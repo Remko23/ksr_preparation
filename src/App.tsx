@@ -7,210 +7,70 @@ export function cn(...inputs: (string | undefined | null | false)[]) {
   return twMerge(clsx(inputs));
 }
 
-type AppMode = 'splot' | 'suma' | 'fourier' | 'probkowanie' | 'kwantyzacja' | 'filtracja' | 'kompresja';
-
-interface Complex {
-  re: number;
-  im: number;
-}
+type AppMode = 'podstawy' | 'operacje' | 'przekroje';
 
 interface AppState {
   mode: AppMode;
 
-  // Splot mode
-  isCorrect_splotLiniowy: boolean | null;
-  showSolution_splotLiniowy: boolean;
-  showHelp_splotLiniowy: boolean;
-  x_liniowy: number[];
-  y_liniowy: number[];
-  userAnswers_liniowy: string[];
+  // Podstawy mode
+  A_podstawy: number[];
+  isCorrect_card: boolean | null;
+  showSolution_card: boolean;
+  showHelp_card: boolean;
+  userCard: string;
 
-  isCorrect_splotOkresowy: boolean | null;
-  showSolution_splotOkresowy: boolean;
-  showHelp_splotOkresowy: boolean;
-  x_okresowy: number[];
-  y_okresowy: number[];
-  userAnswers_okresowy: string[];
+  isCorrect_hgt: boolean | null;
+  showSolution_hgt: boolean;
+  showHelp_hgt: boolean;
+  userHgt: string;
 
-  // Dyskretne mode (Suma Ważona)
-  isCorrect_wzor: boolean | null;
-  showSolution_wzor: boolean;
-  showHelp_wzor: boolean;
-  sumaX_wzor: number[];
-  userSumaCoeffs: string[];
-  userSumaShifts: string[];
+  isCorrect_supp: boolean | null;
+  showSolution_supp: boolean;
+  showHelp_supp: boolean;
+  userSupp: string;
 
-  isCorrect_energia: boolean | null;
-  showSolution_energia: boolean;
-  showHelp_energia: boolean;
-  sumaX_energia: number[];
-  userSumaEnergyAnswer: string;
+  // Operacje mode
+  A_operacje: number[];
+  B_operacje: number[];
+  
+  isCorrect_suma: boolean | null;
+  showSolution_suma: boolean;
+  showHelp_suma: boolean;
+  userSuma: string[];
 
-  // Fourier mode
-  isCorrect_dft: boolean | null;
-  showSolution_dft: boolean;
-  showHelp_dft: boolean;
-  fourierX_dft: number[];
-  userFourierAnswers: string[];
+  isCorrect_iloczyn: boolean | null;
+  showSolution_iloczyn: boolean;
+  showHelp_iloczyn: boolean;
+  userIloczyn: string[];
 
-  isCorrect_idft: boolean | null;
-  showSolution_idft: boolean;
-  showHelp_idft: boolean;
-  fourierX_idft: number[];
-  userFourierAnswersIDFT: string[];
+  isCorrect_dopelnienie: boolean | null;
+  showSolution_dopelnienie: boolean;
+  showHelp_dopelnienie: boolean;
+  userDopelnienie: string[];
 
-  // Probkowanie mode
-  isCorrect_nyquist: boolean | null;
-  showSolution_nyquist: boolean;
-  showHelp_nyquist: boolean;
-  probkowanieF1: number;
-  probkowanieF2: number;
-  probkowanieA1: number;
-  probkowanieA2: number;
-  userProbkowanieNyquistAnswer: string;
-
-  isCorrect_aliasing: boolean | null;
-  showSolution_aliasing: boolean;
-  showHelp_aliasing: boolean;
-  probkowanieF_in: number;
-  probkowanieF_s: number;
-  userProbkowanieAliasingAnswer: string;
-
-  // Kwantyzacja mode
-  isCorrect_kwantyzacjaKrok: boolean | null;
-  showSolution_kwantyzacjaKrok: boolean;
-  showHelp_kwantyzacjaKrok: boolean;
-  kwantyzacjaUmin: number;
-  kwantyzacjaUmax: number;
-  kwantyzacjaBitsKrok: number;
-  userKwantyzacjaKrok: string;
-
-  isCorrect_kwantyzacjaSqnr: boolean | null;
-  showSolution_kwantyzacjaSqnr: boolean;
-  showHelp_kwantyzacjaSqnr: boolean;
-  kwantyzacjaSqnrBits: number;
-  userKwantyzacjaSqnr: string;
-
-  // Filtracja mode
-  isCorrect_filtracjaWyjscie: boolean | null;
-  showSolution_filtracjaWyjscie: boolean;
-  showHelp_filtracjaWyjscie: boolean;
-  filtracjaWyjscieX: number[];
-  filtracjaWyjscieA: number;
-  filtracjaWyjscieB: number;
-  userFiltracjaWyjscie: string[];
-
-  isCorrect_filtracjaIIR: boolean | null;
-  showSolution_filtracjaIIR: boolean;
-  showHelp_filtracjaIIR: boolean;
-  filtracjaIIRA: number;
-  filtracjaIIRB: number;
-  userFiltracjaIIR: string[];
-
-  // Kompresja mode
-  isCorrect_kompresjaHamming: boolean | null;
-  showSolution_kompresjaHamming: boolean;
-  showHelp_kompresjaHamming: boolean;
-  kompresjaHammingData: number[];
-  userKompresjaHamming: string[];
-
-  isCorrect_kompresjaShannon: boolean | null;
-  showSolution_kompresjaShannon: boolean;
-  showHelp_kompresjaShannon: boolean;
-  kompresjaShannonProbs: number[];
-  userKompresjaShannon: string[];
+  // Przekroje mode
+  A_przekroje: number[];
+  alpha: number;
+  
+  isCorrect_przekroj: boolean | null;
+  showSolution_przekroj: boolean;
+  showHelp_przekroj: boolean;
+  userPrzekroj: string[];
 
   alertMsg: string | null;
 }
 
-const getRandomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
+const round1 = (val: number) => Math.round(val * 10) / 10;
+const generateFuzzySet = (length: number) => Array.from({ length }, () => round1(Math.random()));
 
-const generateArray = (length: number) => {
-  return Array.from({ length }, () => getRandomInt(-3, 5));
-};
+const calcCard = (A: number[]) => round1(A.reduce((a, b) => a + b, 0));
+const calcHgt = (A: number[]) => Math.max(...A);
+const calcSuppSize = (A: number[]) => A.filter(x => x > 0).length;
 
-const calculateLinearConvolution = (x: number[], y: number[]) => {
-  const result = new Array(x.length + y.length - 1).fill(0);
-  for (let i = 0; i < x.length; i++) {
-    for (let j = 0; j < y.length; j++) {
-      result[i + j] += x[i] * y[j];
-    }
-  }
-  return result;
-};
-
-const calculateCircularConvolution = (x: number[], y: number[]) => {
-  const N = Math.max(x.length, y.length);
-  const padX = [...x, ...new Array(N - x.length).fill(0)];
-  const padY = [...y, ...new Array(N - y.length).fill(0)];
-  const result = new Array(N).fill(0);
-
-  for (let n = 0; n < N; n++) {
-    for (let k = 0; k < N; k++) {
-      let idx = (n - k) % N;
-      if (idx < 0) idx += N;
-      result[n] += padX[k] * padY[idx];
-    }
-  }
-  return result;
-};
-
-function parseComplex(s: string): Complex | null {
-  s = s.replace(/\s+/g, '').toLowerCase().replace(/i/g, 'j');
-  if (!s) return null;
-
-  let re = 0;
-  let im = 0;
-
-  if (s === 'j') return { re: 0, im: 1 };
-  if (s === '-j') return { re: 0, im: -1 };
-
-  if (!s.includes('j')) {
-    const r = parseFloat(s);
-    return isNaN(r) ? null : { re: r, im: 0 };
-  }
-
-  const terms = s.match(/[+-]?[^+-]+/g);
-  if (!terms) return null;
-
-  for (let term of terms) {
-    if (term.includes('j')) {
-      const valStr = term.replace('j', '');
-      if (valStr === '' || valStr === '+') im += 1;
-      else if (valStr === '-') im -= 1;
-      else im += parseFloat(valStr);
-    } else {
-      re += parseFloat(term);
-    }
-  }
-
-  if (isNaN(re) || isNaN(im)) return null;
-  return { re, im };
-}
-
-function formatComplex(c: Complex): string {
-  if (c.im === 0) return `${c.re}`;
-  if (c.re === 0) {
-    if (c.im === 1) return `j`;
-    if (c.im === -1) return `-j`;
-    return `${c.im}j`;
-  }
-  let imStr = '';
-  if (c.im === 1) imStr = '+j';
-  else if (c.im === -1) imStr = '-j';
-  else if (c.im > 0) imStr = `+${c.im}j`;
-  else imStr = `${c.im}j`;
-  return `${c.re}${imStr}`;
-}
-
-function calculateDFT4(x: number[]): Complex[] {
-  return [
-    { re: x[0] + x[1] + x[2] + x[3], im: 0 },
-    { re: x[0] - x[2], im: x[3] - x[1] },
-    { re: x[0] - x[1] + x[2] - x[3], im: 0 },
-    { re: x[0] - x[2], im: x[1] - x[3] }
-  ];
-}
+const fuzzyUnion = (A: number[], B: number[]) => A.map((a, i) => Math.max(a, B[i]));
+const fuzzyIntersection = (A: number[], B: number[]) => A.map((a, i) => Math.min(a, B[i]));
+const fuzzyComplement = (A: number[]) => A.map(a => round1(1 - a));
+const calcAlphaCut = (A: number[], alpha: number) => A.map(a => a >= alpha ? 1 : 0);
 
 // Custom Ninja Icons
 const SenseiWuIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -241,6 +101,7 @@ const NinjaIcon = ({ color, darkColor, className }: { color: string, darkColor: 
     <path d="M 56 32 Q 64 36 62 42" fill="none" stroke={color} strokeWidth="4" strokeLinecap="round" />
   </svg>
 );
+
 const TaskControls = ({
   onCheck, onToggleSolution, showSolution, onToggleHelp, showHelp
 }: {
@@ -304,163 +165,63 @@ const TaskSection = ({ children }: { children: React.ReactNode }) => (
 
 function App() {
   const [state, setState] = useState<AppState>({
-    mode: 'fourier',
+    mode: 'podstawy',
 
-    isCorrect_splotLiniowy: null, showSolution_splotLiniowy: false, showHelp_splotLiniowy: false,
-    x_liniowy: [], y_liniowy: [], userAnswers_liniowy: [],
+    // Podstawy
+    A_podstawy: [],
+    isCorrect_card: null, showSolution_card: false, showHelp_card: false, userCard: '',
+    isCorrect_hgt: null, showSolution_hgt: false, showHelp_hgt: false, userHgt: '',
+    isCorrect_supp: null, showSolution_supp: false, showHelp_supp: false, userSupp: '',
 
-    isCorrect_splotOkresowy: null, showSolution_splotOkresowy: false, showHelp_splotOkresowy: false,
-    x_okresowy: [], y_okresowy: [], userAnswers_okresowy: [],
+    // Operacje
+    A_operacje: [], B_operacje: [],
+    isCorrect_suma: null, showSolution_suma: false, showHelp_suma: false, userSuma: [],
+    isCorrect_iloczyn: null, showSolution_iloczyn: false, showHelp_iloczyn: false, userIloczyn: [],
+    isCorrect_dopelnienie: null, showSolution_dopelnienie: false, showHelp_dopelnienie: false, userDopelnienie: [],
 
-    isCorrect_wzor: null, showSolution_wzor: false, showHelp_wzor: false,
-    sumaX_wzor: [], userSumaCoeffs: [], userSumaShifts: [],
-
-    isCorrect_energia: null, showSolution_energia: false, showHelp_energia: false,
-    sumaX_energia: [], userSumaEnergyAnswer: '',
-
-    isCorrect_dft: null, showSolution_dft: false, showHelp_dft: false,
-    fourierX_dft: [], userFourierAnswers: [],
-
-    isCorrect_idft: null, showSolution_idft: false, showHelp_idft: false,
-    fourierX_idft: [], userFourierAnswersIDFT: [],
-
-    isCorrect_nyquist: null, showSolution_nyquist: false, showHelp_nyquist: false,
-    probkowanieF1: 0, probkowanieF2: 0, probkowanieA1: 0, probkowanieA2: 0, userProbkowanieNyquistAnswer: '',
-
-    isCorrect_aliasing: null, showSolution_aliasing: false, showHelp_aliasing: false,
-    probkowanieF_in: 0, probkowanieF_s: 0, userProbkowanieAliasingAnswer: '',
-
-    isCorrect_kwantyzacjaKrok: null, showSolution_kwantyzacjaKrok: false, showHelp_kwantyzacjaKrok: false,
-    kwantyzacjaUmin: 0, kwantyzacjaUmax: 0, kwantyzacjaBitsKrok: 0, userKwantyzacjaKrok: '',
-
-    isCorrect_kwantyzacjaSqnr: null, showSolution_kwantyzacjaSqnr: false, showHelp_kwantyzacjaSqnr: false,
-    kwantyzacjaSqnrBits: 0, userKwantyzacjaSqnr: '',
-
-    isCorrect_filtracjaWyjscie: null, showSolution_filtracjaWyjscie: false, showHelp_filtracjaWyjscie: false,
-    filtracjaWyjscieX: [], filtracjaWyjscieA: 0, filtracjaWyjscieB: 0, userFiltracjaWyjscie: [],
-
-    isCorrect_filtracjaIIR: null, showSolution_filtracjaIIR: false, showHelp_filtracjaIIR: false,
-    filtracjaIIRA: 0, filtracjaIIRB: 0, userFiltracjaIIR: [],
-
-    isCorrect_kompresjaHamming: null, showSolution_kompresjaHamming: false, showHelp_kompresjaHamming: false,
-    kompresjaHammingData: [], userKompresjaHamming: [],
-
-    isCorrect_kompresjaShannon: null, showSolution_kompresjaShannon: false, showHelp_kompresjaShannon: false,
-    kompresjaShannonProbs: [], userKompresjaShannon: [],
+    // Przekroje
+    A_przekroje: [], alpha: 0,
+    isCorrect_przekroj: null, showSolution_przekroj: false, showHelp_przekroj: false, userPrzekroj: [],
 
     alertMsg: null,
   });
 
   const generateProblem = (modeOverride?: AppMode) => {
     const currentMode = modeOverride || state.mode;
+    const len = 5; // Długość zbioru np. x1, x2, x3, x4, x5
 
-    if (currentMode === 'splot') {
-      const lenXL = getRandomInt(3, 5); const lenYL = getRandomInt(3, 4);
-      const lenXO = getRandomInt(3, 5); const lenYO = getRandomInt(3, 4);
-
+    if (currentMode === 'podstawy') {
       setState(s => ({
         ...s,
-        mode: 'splot',
-        x_liniowy: generateArray(lenXL),
-        y_liniowy: generateArray(lenYL),
-        userAnswers_liniowy: new Array(lenXL + lenYL - 1).fill(''),
-        isCorrect_splotLiniowy: null, showSolution_splotLiniowy: false, showHelp_splotLiniowy: false,
-
-        x_okresowy: generateArray(lenXO),
-        y_okresowy: generateArray(lenYO),
-        userAnswers_okresowy: new Array(Math.max(lenXO, lenYO)).fill(''),
-        isCorrect_splotOkresowy: null, showSolution_splotOkresowy: false, showHelp_splotOkresowy: false,
+        mode: 'podstawy',
+        A_podstawy: generateFuzzySet(len),
+        isCorrect_card: null, showSolution_card: false, showHelp_card: false, userCard: '',
+        isCorrect_hgt: null, showSolution_hgt: false, showHelp_hgt: false, userHgt: '',
+        isCorrect_supp: null, showSolution_supp: false, showHelp_supp: false, userSupp: '',
       }));
-    } else if (currentMode === 'suma') {
-      const lenXWzor = getRandomInt(4, 5);
-      const lenXEnergia = getRandomInt(3, 5);
-
+    } else if (currentMode === 'operacje') {
       setState(s => ({
         ...s,
-        mode: 'suma',
-        sumaX_wzor: generateArray(lenXWzor),
-        userSumaCoeffs: new Array(lenXWzor).fill(''),
-        userSumaShifts: new Array(lenXWzor - 1).fill(''),
-        isCorrect_wzor: null, showSolution_wzor: false, showHelp_wzor: false,
-
-        sumaX_energia: generateArray(lenXEnergia),
-        userSumaEnergyAnswer: '',
-        isCorrect_energia: null, showSolution_energia: false, showHelp_energia: false,
+        mode: 'operacje',
+        A_operacje: generateFuzzySet(len),
+        B_operacje: generateFuzzySet(len),
+        isCorrect_suma: null, showSolution_suma: false, showHelp_suma: false, userSuma: new Array(len).fill(''),
+        isCorrect_iloczyn: null, showSolution_iloczyn: false, showHelp_iloczyn: false, userIloczyn: new Array(len).fill(''),
+        isCorrect_dopelnienie: null, showSolution_dopelnienie: false, showHelp_dopelnienie: false, userDopelnienie: new Array(len).fill(''),
       }));
-    } else if (currentMode === 'fourier') {
+    } else if (currentMode === 'przekroje') {
       setState(s => ({
         ...s,
-        mode: 'fourier',
-        fourierX_dft: generateArray(4),
-        userFourierAnswers: new Array(4).fill(''),
-        isCorrect_dft: null, showSolution_dft: false, showHelp_dft: false,
-
-        fourierX_idft: generateArray(4),
-        userFourierAnswersIDFT: new Array(4).fill(''),
-        isCorrect_idft: null, showSolution_idft: false, showHelp_idft: false,
-      }));
-    } else if (currentMode === 'probkowanie') {
-      setState(s => ({
-        ...s,
-        mode: 'probkowanie',
-        probkowanieF1: getRandomInt(1, 15) * 10,
-        probkowanieF2: getRandomInt(1, 15) * 10,
-        probkowanieA1: getRandomInt(2, 9),
-        probkowanieA2: getRandomInt(2, 9),
-        userProbkowanieNyquistAnswer: '',
-        isCorrect_nyquist: null, showSolution_nyquist: false, showHelp_nyquist: false,
-
-        probkowanieF_in: getRandomInt(10, 30) * 10,
-        probkowanieF_s: getRandomInt(4, 9) * 10,
-        userProbkowanieAliasingAnswer: '',
-        isCorrect_aliasing: null, showSolution_aliasing: false, showHelp_aliasing: false,
-      }));
-    } else if (currentMode === 'kwantyzacja') {
-      setState(s => ({
-        ...s,
-        mode: 'kwantyzacja',
-        kwantyzacjaUmin: getRandomInt(-10, -1),
-        kwantyzacjaUmax: getRandomInt(1, 10),
-        kwantyzacjaBitsKrok: getRandomInt(3, 10),
-        userKwantyzacjaKrok: '',
-        isCorrect_kwantyzacjaKrok: null, showSolution_kwantyzacjaKrok: false, showHelp_kwantyzacjaKrok: false,
-
-        kwantyzacjaSqnrBits: getRandomInt(6, 16),
-        userKwantyzacjaSqnr: '',
-        isCorrect_kwantyzacjaSqnr: null, showSolution_kwantyzacjaSqnr: false, showHelp_kwantyzacjaSqnr: false,
-      }));
-    } else if (currentMode === 'filtracja') {
-      setState(s => ({
-        ...s,
-        mode: 'filtracja',
-        filtracjaWyjscieX: generateArray(4),
-        filtracjaWyjscieA: getRandomInt(1, 3),
-        filtracjaWyjscieB: getRandomInt(-2, 2) || 1,
-        userFiltracjaWyjscie: new Array(4).fill(''),
-        isCorrect_filtracjaWyjscie: null, showSolution_filtracjaWyjscie: false, showHelp_filtracjaWyjscie: false,
-
-        filtracjaIIRA: getRandomInt(1, 3),
-        filtracjaIIRB: getRandomInt(-2, 2) || 2,
-        userFiltracjaIIR: new Array(3).fill(''),
-        isCorrect_filtracjaIIR: null, showSolution_filtracjaIIR: false, showHelp_filtracjaIIR: false,
-      }));
-    } else if (currentMode === 'kompresja') {
-      setState(s => ({
-        ...s,
-        mode: 'kompresja',
-        kompresjaHammingData: generateArray(4).map(v => Math.abs(v) % 2),
-        userKompresjaHamming: new Array(3).fill(''),
-        isCorrect_kompresjaHamming: null, showSolution_kompresjaHamming: false, showHelp_kompresjaHamming: false,
-
-        kompresjaShannonProbs: [50, 25, 12.5, 12.5],
-        userKompresjaShannon: new Array(4).fill(''),
-        isCorrect_kompresjaShannon: null, showSolution_kompresjaShannon: false, showHelp_kompresjaShannon: false,
+        mode: 'przekroje',
+        A_przekroje: generateFuzzySet(len),
+        alpha: round1(Math.random() * 0.8 + 0.1), // alpha od 0.1 do 0.9
+        isCorrect_przekroj: null, showSolution_przekroj: false, showHelp_przekroj: false, userPrzekroj: new Array(len).fill(''),
       }));
     }
   };
 
   useEffect(() => {
-    generateProblem('fourier');
+    generateProblem('podstawy');
   }, []);
 
   const switchMode = (mode: AppMode) => {
@@ -468,943 +229,412 @@ function App() {
   };
 
   const handleCheck = (taskType: string) => {
-    if (taskType === 'splotLiniowy') {
-      const parsed = state.userAnswers_liniowy.map((s) => parseInt(s.trim(), 10));
-      if (parsed.some(isNaN)) {
-        setState(s => ({ ...s, alertMsg: 'Wypełnij wszystkie okienka poprawnymi liczbami całkowitymi.' }));
+    // PODSTAWY
+    if (taskType === 'card') {
+      const parsed = parseFloat(state.userCard.trim().replace(',', '.'));
+      if (isNaN(parsed)) {
+        setState(s => ({ ...s, alertMsg: 'Wpisz poprawną liczbę.' }));
         return;
       }
-      const correct = calculateLinearConvolution(state.x_liniowy, state.y_liniowy);
-      const isMatch = parsed.length === correct.length && parsed.every((val, i) => val === correct[i]);
-      setState(s => ({ ...s, isCorrect_splotLiniowy: isMatch }));
-    } else if (taskType === 'splotOkresowy') {
-      const parsed = state.userAnswers_okresowy.map((s) => parseInt(s.trim(), 10));
-      if (parsed.some(isNaN)) {
-        setState(s => ({ ...s, alertMsg: 'Wypełnij wszystkie okienka poprawnymi liczbami całkowitymi.' }));
+      const correct = calcCard(state.A_podstawy);
+      setState(s => ({ ...s, isCorrect_card: Math.abs(parsed - correct) < 0.05 }));
+    } else if (taskType === 'hgt') {
+      const parsed = parseFloat(state.userHgt.trim().replace(',', '.'));
+      if (isNaN(parsed)) {
+        setState(s => ({ ...s, alertMsg: 'Wpisz poprawną liczbę.' }));
         return;
       }
-      const correct = calculateCircularConvolution(state.x_okresowy, state.y_okresowy);
-      const isMatch = parsed.length === correct.length && parsed.every((val, i) => val === correct[i]);
-      setState(s => ({ ...s, isCorrect_splotOkresowy: isMatch }));
-    } else if (taskType === 'wzor') {
-      const coeffs = state.userSumaCoeffs.map(s => parseInt(s.trim(), 10));
-      const shifts = state.userSumaShifts.map(s => parseInt(s.trim(), 10));
-
-      if (coeffs.some(isNaN) || shifts.some(isNaN)) {
-        setState(s => ({ ...s, alertMsg: 'Wypełnij wszystkie okienka poprawnymi liczbami całkowitymi.' }));
-        return;
-      }
-      const coeffsMatch = coeffs.every((val, i) => val === state.sumaX_wzor[i]);
-      const shiftsMatch = shifts.every((val, i) => val === i + 1);
-      setState(s => ({ ...s, isCorrect_wzor: coeffsMatch && shiftsMatch }));
-    } else if (taskType === 'energia') {
-      const parsed = parseInt(state.userSumaEnergyAnswer.trim(), 10);
+      const correct = calcHgt(state.A_podstawy);
+      setState(s => ({ ...s, isCorrect_hgt: Math.abs(parsed - correct) < 0.05 }));
+    } else if (taskType === 'supp') {
+      const parsed = parseInt(state.userSupp.trim(), 10);
       if (isNaN(parsed)) {
         setState(s => ({ ...s, alertMsg: 'Wpisz poprawną liczbę całkowitą.' }));
         return;
       }
-      const correctEnergy = state.sumaX_energia.reduce((acc, val) => acc + val * val, 0);
-      setState(s => ({ ...s, isCorrect_energia: parsed === correctEnergy }));
-    } else if (taskType === 'dft') {
-      const parsed = state.userFourierAnswers.map(parseComplex);
-      if (parsed.some(p => p === null)) {
-        setState(s => ({ ...s, alertMsg: 'Wprowadź poprawne liczby zespolone (np. 10, -2+2j, -2-2i). Użyj j lub i.' }));
-        return;
-      }
-      const correct = calculateDFT4(state.fourierX_dft);
-      const isMatch = parsed.every((p, i) => p!.re === correct[i].re && p!.im === correct[i].im);
-      setState(s => ({ ...s, isCorrect_dft: isMatch }));
-    } else if (taskType === 'idft') {
-      const parsed = state.userFourierAnswersIDFT.map(s => parseInt(s.trim(), 10));
+      const correct = calcSuppSize(state.A_podstawy);
+      setState(s => ({ ...s, isCorrect_supp: parsed === correct }));
+    } 
+    // OPERACJE
+    else if (taskType === 'suma') {
+      const parsed = state.userSuma.map(s => parseFloat(s.trim().replace(',', '.')));
       if (parsed.some(isNaN)) {
-        setState(s => ({ ...s, alertMsg: 'Wypełnij wszystkie okienka poprawnymi liczbami całkowitymi.' }));
+        setState(s => ({ ...s, alertMsg: 'Wypełnij wszystkie okienka poprawnymi liczbami.' }));
         return;
       }
-      const isMatch = parsed.every((val, i) => val === state.fourierX_idft[i]);
-      setState(s => ({ ...s, isCorrect_idft: isMatch }));
-    } else if (taskType === 'nyquist') {
-      const parsed = parseInt(state.userProbkowanieNyquistAnswer.trim(), 10);
-      if (isNaN(parsed)) {
-        setState(s => ({ ...s, alertMsg: 'Wpisz poprawną liczbę całkowitą (w Hz).' }));
-        return;
-      }
-      const maxF = Math.max(state.probkowanieF1, state.probkowanieF2);
-      const correct = 2 * maxF;
-      setState(s => ({ ...s, isCorrect_nyquist: parsed === correct }));
-    } else if (taskType === 'aliasing') {
-      const parsed = parseInt(state.userProbkowanieAliasingAnswer.trim(), 10);
-      if (isNaN(parsed)) {
-        setState(s => ({ ...s, alertMsg: 'Wpisz poprawną liczbę całkowitą (w Hz).' }));
-        return;
-      }
-      const correct = Math.abs(state.probkowanieF_in - state.probkowanieF_s * Math.round(state.probkowanieF_in / state.probkowanieF_s));
-      setState(s => ({ ...s, isCorrect_aliasing: parsed === correct }));
-    } else if (taskType === 'kwantyzacjaKrok') {
-      const parsed = parseFloat(state.userKwantyzacjaKrok.trim().replace(',', '.'));
-      if (isNaN(parsed)) {
-        setState(s => ({ ...s, alertMsg: 'Wpisz poprawną liczbę.' }));
-        return;
-      }
-      const correct = (state.kwantyzacjaUmax - state.kwantyzacjaUmin) / Math.pow(2, state.kwantyzacjaBitsKrok);
-      const isMatch = Math.abs(parsed - correct) < 0.05;
-      setState(s => ({ ...s, isCorrect_kwantyzacjaKrok: isMatch }));
-    } else if (taskType === 'kwantyzacjaSqnr') {
-      const parsed = parseFloat(state.userKwantyzacjaSqnr.trim().replace(',', '.'));
-      if (isNaN(parsed)) {
-        setState(s => ({ ...s, alertMsg: 'Wpisz poprawną liczbę.' }));
-        return;
-      }
-      const correct = 6.02 * state.kwantyzacjaSqnrBits + 1.76;
-      const isMatch = Math.abs(parsed - correct) < 0.5; // tolerancja na przyblizenia np x6 zamiast x6.02
-      setState(s => ({ ...s, isCorrect_kwantyzacjaSqnr: isMatch }));
-    } else if (taskType === 'filtracjaWyjscie') {
-      const parsed = state.userFiltracjaWyjscie.map(s => parseInt(s.trim(), 10));
+      const correct = fuzzyUnion(state.A_operacje, state.B_operacje);
+      const isMatch = parsed.every((val, i) => Math.abs(val - correct[i]) < 0.05);
+      setState(s => ({ ...s, isCorrect_suma: isMatch }));
+    } else if (taskType === 'iloczyn') {
+      const parsed = state.userIloczyn.map(s => parseFloat(s.trim().replace(',', '.')));
       if (parsed.some(isNaN)) {
-        setState(s => ({ ...s, alertMsg: 'Wypełnij wszystkie okienka poprawnymi liczbami całkowitymi.' }));
+        setState(s => ({ ...s, alertMsg: 'Wypełnij wszystkie okienka poprawnymi liczbami.' }));
         return;
       }
-      const x = state.filtracjaWyjscieX;
-      const A = state.filtracjaWyjscieA;
-      const B = state.filtracjaWyjscieB;
-      const correct = [
-        A * x[0],
-        A * x[1] + B * x[0],
-        A * x[2] + B * x[1],
-        A * x[3] + B * x[2]
-      ];
-      const isMatch = parsed.length === correct.length && parsed.every((val, i) => val === correct[i]);
-      setState(s => ({ ...s, isCorrect_filtracjaWyjscie: isMatch }));
-    } else if (taskType === 'filtracjaIIR') {
-      const parsed = state.userFiltracjaIIR.map(s => parseInt(s.trim(), 10));
+      const correct = fuzzyIntersection(state.A_operacje, state.B_operacje);
+      const isMatch = parsed.every((val, i) => Math.abs(val - correct[i]) < 0.05);
+      setState(s => ({ ...s, isCorrect_iloczyn: isMatch }));
+    } else if (taskType === 'dopelnienie') {
+      const parsed = state.userDopelnienie.map(s => parseFloat(s.trim().replace(',', '.')));
       if (parsed.some(isNaN)) {
-        setState(s => ({ ...s, alertMsg: 'Wypełnij wszystkie okienka poprawnymi liczbami całkowitymi.' }));
+        setState(s => ({ ...s, alertMsg: 'Wypełnij wszystkie okienka poprawnymi liczbami.' }));
         return;
       }
-      const A = state.filtracjaIIRA;
-      const B = state.filtracjaIIRB;
-      const correct = [A, A * B, A * B * B];
-      const isMatch = parsed.length === correct.length && parsed.every((val, i) => val === correct[i]);
-      setState(s => ({ ...s, isCorrect_filtracjaIIR: isMatch }));
-    } else if (taskType === 'kompresjaHamming') {
-      const parsed = state.userKompresjaHamming.map(s => parseInt(s.trim(), 10));
+      const correct = fuzzyComplement(state.A_operacje);
+      const isMatch = parsed.every((val, i) => Math.abs(val - correct[i]) < 0.05);
+      setState(s => ({ ...s, isCorrect_dopelnienie: isMatch }));
+    }
+    // PRZEKROJE
+    else if (taskType === 'przekroj') {
+      const parsed = state.userPrzekroj.map(s => parseInt(s.trim(), 10));
       if (parsed.some(isNaN) || parsed.some(v => v !== 0 && v !== 1)) {
-        setState(s => ({ ...s, alertMsg: 'Wypełnij wszystkie okienka bitami (0 lub 1).' }));
+        setState(s => ({ ...s, alertMsg: 'Wypełnij okienka wartościami 0 lub 1 (zbiór ostry).' }));
         return;
       }
-      const d = state.kompresjaHammingData;
-      const p1 = d[0] ^ d[1] ^ d[3];
-      const p2 = d[0] ^ d[2] ^ d[3];
-      const p3 = d[1] ^ d[2] ^ d[3];
-      const correct = [p1, p2, p3];
-      const isMatch = parsed.length === correct.length && parsed.every((val, i) => val === correct[i]);
-      setState(s => ({ ...s, isCorrect_kompresjaHamming: isMatch }));
-    } else if (taskType === 'kompresjaShannon') {
-      const parsed = state.userKompresjaShannon.map(s => s.trim());
-      if (parsed.some(s => !/^[01]+$/.test(s))) {
-        setState(s => ({ ...s, alertMsg: 'Kody mogą zawierać tylko 0 i 1.' }));
-        return;
-      }
-      const lengthsOk = parsed[0].length === 1 && parsed[1].length === 2 && parsed[2].length === 3 && parsed[3].length === 3;
-      let prefixFree = true;
-      for (let i = 0; i < parsed.length; i++) {
-        for (let j = 0; j < parsed.length; j++) {
-          if (i !== j && parsed[j].startsWith(parsed[i])) prefixFree = false;
-        }
-      }
-      setState(s => ({ ...s, isCorrect_kompresjaShannon: lengthsOk && prefixFree }));
+      const correct = calcAlphaCut(state.A_przekroje, state.alpha);
+      const isMatch = parsed.every((val, i) => val === correct[i]);
+      setState(s => ({ ...s, isCorrect_przekroj: isMatch }));
     }
   };
+
   let themeClass = 'theme-lloyd';
-  if (state.mode === 'splot') themeClass = 'theme-kai';
-  if (state.mode === 'suma') themeClass = 'theme-jay';
-  if (state.mode === 'probkowanie') themeClass = 'theme-cole';
-  if (state.mode === 'kwantyzacja') themeClass = 'theme-zane';
-  if (state.mode === 'filtracja') themeClass = 'theme-dareth';
-  if (state.mode === 'kompresja') themeClass = 'theme-nya';
+  if (state.mode === 'operacje') themeClass = 'theme-kai';
+  if (state.mode === 'przekroje') themeClass = 'theme-jay';
 
   useEffect(() => {
     document.body.className = themeClass;
   }, [themeClass]);
 
   // Loading safety
-  if (state.mode === 'fourier' && state.fourierX_dft.length === 0) return null;
-  if (state.mode === 'splot' && state.x_liniowy.length === 0) return null;
-  if (state.mode === 'suma' && state.sumaX_wzor.length === 0) return null;
-  if (state.mode === 'probkowanie' && state.probkowanieF1 === 0) return null;
-  if (state.mode === 'kwantyzacja' && state.kwantyzacjaBitsKrok === 0) return null;
-  if (state.mode === 'filtracja' && state.filtracjaWyjscieX.length === 0) return null;
-  if (state.mode === 'kompresja' && state.kompresjaHammingData.length === 0) return null;
+  if (state.mode === 'podstawy' && state.A_podstawy.length === 0) return null;
+  if (state.mode === 'operacje' && state.A_operacje.length === 0) return null;
+  if (state.mode === 'przekroje' && state.A_przekroje.length === 0) return null;
 
   const ninjaQuotes: Record<AppMode, string> = {
-    splot: '"Sensei once told me it\'s not the size of the ninja in a fight, but the size of the fight in the ninja" ~ Kai',
-    suma: '"ALRIGHT?! WHO TOOK MY PUDDING CUP?" ~ Jay',
-    fourier: '"Fair? Fair isn\'t a word from where I come from!" ~ Lloyd',
-    probkowanie: '"Cake is usually the answer to anything." ~ Cole',
-    kwantyzacja: '"This isn\'t about numbers, this is about family." ~ Zane',
-    filtracja: '"Welcome to my Mojo Dojo, and I Dareth YOU to challenge me!" ~ Dareth',
-    kompresja: '"I am Nya. I am the sea." ~ Nya'
+    podstawy: '"Zrozumienie fundamentów to pierwszy krok na drodze Mistrza!" ~ Sensei Wu',
+    operacje: '"Prawdziwa siła płynie z łączenia żywiołów!" ~ Kai',
+    przekroje: '"Precyzja cięcia zależy od siły skupienia!" ~ Jay',
+  };
+
+  const formatSet = (set: number[]) => {
+    return `{ ${set.map((val, idx) => `${val}/x${idx + 1}`).join(' + ')} }`;
   };
 
   return (
     <div className={cn("theme-container", themeClass)}>
       <div className="lego-panel">
-        <h1 className="title">NinjaCPS</h1>
+        <h1 className="title">Ninja Fuzzy Set</h1>
         <p className="subtitle" style={{ color: 'var(--theme-primary)' }}>{ninjaQuotes[state.mode]}</p>
 
         <div className="tab-switcher" style={{ marginBottom: '2rem' }}>
-          <button className={cn("tab-btn", state.mode === 'fourier' && "active")} onClick={() => switchMode('fourier')}>
-            <NinjaIcon color="#22c55e" darkColor="#15803d" /> Fourier
+          <button className={cn("tab-btn", state.mode === 'podstawy' && "active")} onClick={() => switchMode('podstawy')}>
+            <NinjaIcon color="#22c55e" darkColor="#15803d" /> Podstawy
           </button>
-          <button className={cn("tab-btn", state.mode === 'splot' && "active")} onClick={() => switchMode('splot')}>
-            <NinjaIcon color="#ef4444" darkColor="#991b1b" /> Splot
+          <button className={cn("tab-btn", state.mode === 'operacje' && "active")} onClick={() => switchMode('operacje')}>
+            <NinjaIcon color="#ef4444" darkColor="#991b1b" /> Operacje
           </button>
-          <button className={cn("tab-btn", state.mode === 'suma' && "active")} onClick={() => switchMode('suma')}>
-            <NinjaIcon color="#3b82f6" darkColor="#1e3a8a" /> Dyskretne
-          </button>
-          <button className={cn("tab-btn", state.mode === 'probkowanie' && "active")} onClick={() => switchMode('probkowanie')}>
-            <NinjaIcon color="#334155" darkColor="#0f172a" /> Próbkowanie
-          </button>
-          <button className={cn("tab-btn", state.mode === 'kwantyzacja' && "active")} onClick={() => switchMode('kwantyzacja')}>
-            <NinjaIcon color="#e2e8f0" darkColor="#64748b" /> Kwantyzacja
-          </button>
-          <button className={cn("tab-btn", state.mode === 'kompresja' && "active")} onClick={() => switchMode('kompresja')}>
-            <NinjaIcon color="#0891b2" darkColor="#164e63" /> Kompresja
-          </button>
-          <button className={cn("tab-btn", state.mode === 'filtracja' && "active")} onClick={() => switchMode('filtracja')}>
-            <NinjaIcon color="#a16207" darkColor="#713f12" /> Filtracja
+          <button className={cn("tab-btn", state.mode === 'przekroje' && "active")} onClick={() => switchMode('przekroje')}>
+            <NinjaIcon color="#3b82f6" darkColor="#1e3a8a" /> Przekroje
           </button>
         </div>
 
-        {/* ----------------- SPLOT ----------------- */}
-        {state.mode === 'splot' && (
+        {/* ----------------- PODSTAWY ----------------- */}
+        {state.mode === 'podstawy' && (
           <>
-            {/* Liniowy */}
+            <div className="card" style={{ marginBottom: '1.5rem' }}>
+              <div className="operation-type">Zbiór rozmyty A w przestrzeni X = {'{'}x1, x2, x3, x4, x5{'}'}</div>
+              <div className="array-display">
+                <span className="array-label">A =</span>
+                <span className="array-values">{formatSet(state.A_podstawy)}</span>
+              </div>
+            </div>
+
+            {/* Kardynalność */}
             <TaskSection>
               <div className="card">
-                <div className="operation-type">1. Splot Liniowy</div>
-                <div className="array-display">
-                  <span className="array-label">x(n) =</span>
-                  <span className="array-values">[{state.x_liniowy.join(', ')}]</span>
-                </div>
-                <div className="array-display">
-                  <span className="array-label">y(n) =</span>
-                  <span className="array-values">[{state.y_liniowy.join(', ')}]</span>
-                </div>
+                <div className="operation-type">1. Kardynalność zbioru (Moc zbioru)</div>
+                <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '0.5rem 0 0 0' }}>Oblicz card(A).</p>
               </div>
               <div className="input-group">
-                <label className="input-label">Twoja odpowiedź (wpisz po jednej liczbie):</label>
                 <div className="answers-row">
-                  {state.userAnswers_liniowy.map((val, idx) => (
-                    <input
-                      key={idx} type="text" className="answer-box" value={val}
-                      onChange={(e) => {
-                        const newAns = [...state.userAnswers_liniowy]; newAns[idx] = e.target.value;
-                        setState(s => ({ ...s, userAnswers_liniowy: newAns, isCorrect_splotLiniowy: null }));
-                      }}
-                      onKeyDown={(e) => { if (e.key === 'Enter') handleCheck('splotLiniowy'); }}
-                    />
-                  ))}
+                  <span style={{ fontWeight: 800, fontSize: '1.5rem', color: 'var(--text-dark)' }}>card(A) = </span>
+                  <input type="text" className="answer-box" style={{ width: '6rem' }} value={state.userCard}
+                    onChange={(e) => setState(s => ({ ...s, userCard: e.target.value, isCorrect_card: null }))}
+                    onKeyDown={(e) => e.key === 'Enter' && handleCheck('card')} />
                 </div>
               </div>
-
               <TaskControls
-                onCheck={() => handleCheck('splotLiniowy')}
-                showSolution={state.showSolution_splotLiniowy} onToggleSolution={() => setState(s => ({ ...s, showSolution_splotLiniowy: !s.showSolution_splotLiniowy }))}
-                showHelp={state.showHelp_splotLiniowy} onToggleHelp={() => setState(s => ({ ...s, showHelp_splotLiniowy: !s.showHelp_splotLiniowy }))}
+                onCheck={() => handleCheck('card')}
+                showSolution={state.showSolution_card} onToggleSolution={() => setState(s => ({ ...s, showSolution_card: !s.showSolution_card }))}
+                showHelp={state.showHelp_card} onToggleHelp={() => setState(s => ({ ...s, showHelp_card: !s.showHelp_card }))}
               />
-              <TaskResult isCorrect={state.isCorrect_splotLiniowy} />
-
-              {state.showHelp_splotLiniowy && (
+              <TaskResult isCorrect={state.isCorrect_card} />
+              {state.showHelp_card && (
                 <div className="sensei-container" style={{ marginTop: '1rem' }}>
                   <SenseiWuIcon className="sensei-avatar" />
                   <div className="help-box">
-                    <p><strong>Metoda tabelkowa:</strong> Narysuj tabelę. W nagłówkach kolumn zapisz wartości x(n), a w wierszach y(n). W każdej komórce wpisz iloczyn odpowiadających wartości z nagłówków. Wynikiem są <strong>sumy na przekątnych</strong> (od lewego-górnego rogu po skosie w prawo-w-dół).</p>
-                    <p><i>Splot liniowy ma długość N + M - 1.</i></p>
+                    <p>Kardynalność zbioru rozmytego to suma wszystkich jego wartości przynależności (liczb przed znakiem /).</p>
                   </div>
                 </div>
               )}
-
-              {state.showSolution_splotLiniowy && (
+              {state.showSolution_card && (
                 <div className="solution-box" style={{ marginTop: '1rem' }}>
-                  <span>Odpowiedź: [{calculateLinearConvolution(state.x_liniowy, state.y_liniowy).join(', ')}]</span>
+                  <span>Odpowiedź: card(A) = {calcCard(state.A_podstawy).toFixed(1)}</span>
                 </div>
               )}
             </TaskSection>
 
-            {/* Okresowy */}
+            {/* Wysokość */}
             <TaskSection>
               <div className="card">
-                <div className="operation-type">2. Splot Okresowy</div>
-                <div className="array-display">
-                  <span className="array-label">x(n) =</span>
-                  <span className="array-values">[{state.x_okresowy.join(', ')}]</span>
-                </div>
-                <div className="array-display">
-                  <span className="array-label">y(n) =</span>
-                  <span className="array-values">[{state.y_okresowy.join(', ')}]</span>
-                </div>
+                <div className="operation-type">2. Wysokość zbioru</div>
+                <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '0.5rem 0 0 0' }}>Oblicz hgt(A).</p>
               </div>
               <div className="input-group">
-                <label className="input-label">Twoja odpowiedź (wpisz po jednej liczbie):</label>
                 <div className="answers-row">
-                  {state.userAnswers_okresowy.map((val, idx) => (
-                    <input
-                      key={idx} type="text" className="answer-box" value={val}
-                      onChange={(e) => {
-                        const newAns = [...state.userAnswers_okresowy]; newAns[idx] = e.target.value;
-                        setState(s => ({ ...s, userAnswers_okresowy: newAns, isCorrect_splotOkresowy: null }));
-                      }}
-                      onKeyDown={(e) => { if (e.key === 'Enter') handleCheck('splotOkresowy'); }}
-                    />
-                  ))}
+                  <span style={{ fontWeight: 800, fontSize: '1.5rem', color: 'var(--text-dark)' }}>hgt(A) = </span>
+                  <input type="text" className="answer-box" style={{ width: '6rem' }} value={state.userHgt}
+                    onChange={(e) => setState(s => ({ ...s, userHgt: e.target.value, isCorrect_hgt: null }))}
+                    onKeyDown={(e) => e.key === 'Enter' && handleCheck('hgt')} />
                 </div>
               </div>
-
               <TaskControls
-                onCheck={() => handleCheck('splotOkresowy')}
-                showSolution={state.showSolution_splotOkresowy} onToggleSolution={() => setState(s => ({ ...s, showSolution_splotOkresowy: !s.showSolution_splotOkresowy }))}
-                showHelp={state.showHelp_splotOkresowy} onToggleHelp={() => setState(s => ({ ...s, showHelp_splotOkresowy: !s.showHelp_splotOkresowy }))}
+                onCheck={() => handleCheck('hgt')}
+                showSolution={state.showSolution_hgt} onToggleSolution={() => setState(s => ({ ...s, showSolution_hgt: !s.showSolution_hgt }))}
+                showHelp={state.showHelp_hgt} onToggleHelp={() => setState(s => ({ ...s, showHelp_hgt: !s.showHelp_hgt }))}
               />
-              <TaskResult isCorrect={state.isCorrect_splotOkresowy} />
-
-              {state.showHelp_splotOkresowy && (
+              <TaskResult isCorrect={state.isCorrect_hgt} />
+              {state.showHelp_hgt && (
                 <div className="sensei-container" style={{ marginTop: '1rem' }}>
                   <SenseiWuIcon className="sensei-avatar" />
                   <div className="help-box">
-                    <p>Najpierw uzupełnij krótszy ciąg zerami na końcu, tak aby oba miały równą długość L (czyli max(N, M)). Następnie użyj <strong>metody macierzowej</strong>:</p>
-                    <ul>
-                      <li>Zbuduj macierz z pierwszego sygnału. Pierwsza kolumna to po prostu sygnał x(n). Kolejne kolumny to cykliczne przesunięcie poprzedniej kolumny <strong>w dół</strong> o 1 pozycję.</li>
-                      <li>Pomnóż tę macierz przez pionowy wektor drugiego sygnału y(n). Wynikowy wektor to szukany splot Okresowy.</li>
-                    </ul>
+                    <p>Wysokość zbioru rozmytego to jego maksymalna wartość przynależności. Jeżeli hgt(A)=1, zbiór nazywamy normalnym.</p>
                   </div>
                 </div>
               )}
-
-              {state.showSolution_splotOkresowy && (
+              {state.showSolution_hgt && (
                 <div className="solution-box" style={{ marginTop: '1rem' }}>
-                  <span>Odpowiedź: [{calculateCircularConvolution(state.x_okresowy, state.y_okresowy).join(', ')}]</span>
+                  <span>Odpowiedź: hgt(A) = {calcHgt(state.A_podstawy).toFixed(1)}</span>
+                </div>
+              )}
+            </TaskSection>
+
+            {/* Nośnik */}
+            <TaskSection>
+              <div className="card">
+                <div className="operation-type">3. Wielkość nośnika (Support)</div>
+                <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '0.5rem 0 0 0' }}>Ile elementów należy do nośnika zbioru A? (czyli podaj wielkość zbioru supp(A))</p>
+              </div>
+              <div className="input-group">
+                <div className="answers-row">
+                  <span style={{ fontWeight: 800, fontSize: '1.5rem', color: 'var(--text-dark)' }}>|supp(A)| = </span>
+                  <input type="text" className="answer-box" style={{ width: '6rem' }} value={state.userSupp}
+                    onChange={(e) => setState(s => ({ ...s, userSupp: e.target.value, isCorrect_supp: null }))}
+                    onKeyDown={(e) => e.key === 'Enter' && handleCheck('supp')} />
+                </div>
+              </div>
+              <TaskControls
+                onCheck={() => handleCheck('supp')}
+                showSolution={state.showSolution_supp} onToggleSolution={() => setState(s => ({ ...s, showSolution_supp: !s.showSolution_supp }))}
+                showHelp={state.showHelp_supp} onToggleHelp={() => setState(s => ({ ...s, showHelp_supp: !s.showHelp_supp }))}
+              />
+              <TaskResult isCorrect={state.isCorrect_supp} />
+              {state.showHelp_supp && (
+                <div className="sensei-container" style={{ marginTop: '1rem' }}>
+                  <SenseiWuIcon className="sensei-avatar" />
+                  <div className="help-box">
+                    <p>Nośnik zbioru rozmytego (support) to ostry zbiór elementów przestrzeni rozważań, których stopień przynależności jest <strong>ostro większy od zera</strong> (μ(x) &gt; 0). Policz ile jest takich elementów.</p>
+                  </div>
+                </div>
+              )}
+              {state.showSolution_supp && (
+                <div className="solution-box" style={{ marginTop: '1rem' }}>
+                  <span>Odpowiedź: |supp(A)| = {calcSuppSize(state.A_podstawy)}</span>
                 </div>
               )}
             </TaskSection>
           </>
         )}
 
-        {/* ----------------- DYSKRETNE (SUMA) ----------------- */}
-        {state.mode === 'suma' && (
+        {/* ----------------- OPERACJE ----------------- */}
+        {state.mode === 'operacje' && (
           <>
-            {/* Wzor Task */}
+            <div className="card" style={{ marginBottom: '1.5rem' }}>
+              <div className="operation-type">Zbiory rozmyte A i B w przestrzeni X</div>
+              <div className="array-display">
+                <span className="array-label">A =</span>
+                <span className="array-values">{formatSet(state.A_operacje)}</span>
+              </div>
+              <div className="array-display" style={{ marginTop: '0.5rem' }}>
+                <span className="array-label">B =</span>
+                <span className="array-values">{formatSet(state.B_operacje)}</span>
+              </div>
+            </div>
+
+            {/* Suma */}
             <TaskSection>
               <div className="card">
-                <div className="operation-type">1. Suma Ważona Impulsów Kroneckera</div>
-                <div className="array-display">
-                  <span className="array-label">x(n) =</span>
-                  <span className="array-values">[{state.sumaX_wzor.join(', ')}]</span>
-                </div>
-                <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '0.5rem 0 0 0' }}>Załóż, że początek sygnału zaczyna się od n = 0.</p>
-              </div>
-              <div className="input-group">
-                <label className="input-label">Uzupełnij wzór odpowiednimi liczbami:</label>
-                <div className="formula-row" style={{ flexWrap: 'wrap' }}>
-                  <span>x(n) = </span>
-                  <input type="text" className="formula-input" value={state.userSumaCoeffs[0] || ''}
-                    onChange={(e) => { const newC = [...state.userSumaCoeffs]; newC[0] = e.target.value; setState(s => ({ ...s, userSumaCoeffs: newC, isCorrect_wzor: null })); }}
-                    onKeyDown={(e) => e.key === 'Enter' && handleCheck('wzor')} />
-                  <span>δ(n)</span>
-                  {state.sumaX_wzor.slice(1).map((_, idx) => (
-                    <React.Fragment key={idx + 1}>
-                      <span>+</span>
-                      <input type="text" className="formula-input" value={state.userSumaCoeffs[idx + 1] || ''}
-                        onChange={(e) => { const newC = [...state.userSumaCoeffs]; newC[idx + 1] = e.target.value; setState(s => ({ ...s, userSumaCoeffs: newC, isCorrect_wzor: null })); }}
-                        onKeyDown={(e) => e.key === 'Enter' && handleCheck('wzor')} />
-                      <span>δ(n - </span>
-                      <input type="text" className="formula-input shift" value={state.userSumaShifts[idx] || ''}
-                        onChange={(e) => { const newS = [...state.userSumaShifts]; newS[idx] = e.target.value; setState(s => ({ ...s, userSumaShifts: newS, isCorrect_wzor: null })); }}
-                        onKeyDown={(e) => e.key === 'Enter' && handleCheck('wzor')} />
-                      <span>)</span>
-                    </React.Fragment>
-                  ))}
-                </div>
-              </div>
-
-              <TaskControls
-                onCheck={() => handleCheck('wzor')}
-                showSolution={state.showSolution_wzor} onToggleSolution={() => setState(s => ({ ...s, showSolution_wzor: !s.showSolution_wzor }))}
-                showHelp={state.showHelp_wzor} onToggleHelp={() => setState(s => ({ ...s, showHelp_wzor: !s.showHelp_wzor }))}
-              />
-              <TaskResult isCorrect={state.isCorrect_wzor} />
-
-              {state.showHelp_wzor && (
-                <div className="sensei-container" style={{ marginTop: '1rem' }}>
-                  <SenseiWuIcon className="sensei-avatar" />
-                  <div className="help-box">
-                    <p>Każdy dyskretny sygnał x(n) można zapisać jako sumę przesuniętych impulsów jednostkowych δ(n). Indeks odpowiada przesunięciu w nawiasie δ(n - k), a wartość z tablicy staje się współczynnikiem z przodu.</p>
-                  </div>
-                </div>
-              )}
-              {state.showSolution_wzor && (
-                <div className="solution-box" style={{ marginTop: '1rem' }}>
-                  <span>Odpowiedź: x(n) = {state.sumaX_wzor[0]}δ(n) {state.sumaX_wzor.slice(1).map((val, idx) => `+ ${val}δ(n - ${idx + 1})`).join(' ')}</span>
-                </div>
-              )}
-            </TaskSection>
-
-            {/* Energia Task */}
-            <TaskSection>
-              <div className="card">
-                <div className="operation-type">2. Całkowita Energia Sygnału</div>
-                <div className="array-display">
-                  <span className="array-label">x(n) =</span>
-                  <span className="array-values">[{state.sumaX_energia.join(', ')}]</span>
-                </div>
-                <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '0.5rem 0 0 0' }}>Oblicz całkowitą energię E podanego sygnału.</p>
+                <div className="operation-type">1. Suma Zbiorów (A ∪ B)</div>
+                <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '0.5rem 0 0 0' }}>Wpisz wartości przynależności sumy zbiorów dla elementów x1, ..., x5.</p>
               </div>
               <div className="input-group">
                 <div className="answers-row">
-                  <span style={{ fontWeight: 800, fontSize: '1.5rem', color: 'var(--text-dark)' }}>E = </span>
-                  <input type="text" className="answer-box" style={{ width: '6rem' }} value={state.userSumaEnergyAnswer || ''}
-                    onChange={(e) => setState(s => ({ ...s, userSumaEnergyAnswer: e.target.value, isCorrect_energia: null }))}
-                    onKeyDown={(e) => e.key === 'Enter' && handleCheck('energia')} />
-                </div>
-              </div>
-
-              <TaskControls
-                onCheck={() => handleCheck('energia')}
-                showSolution={state.showSolution_energia} onToggleSolution={() => setState(s => ({ ...s, showSolution_energia: !s.showSolution_energia }))}
-                showHelp={state.showHelp_energia} onToggleHelp={() => setState(s => ({ ...s, showHelp_energia: !s.showHelp_energia }))}
-              />
-              <TaskResult isCorrect={state.isCorrect_energia} />
-
-              {state.showHelp_energia && (
-                <div className="sensei-container" style={{ marginTop: '1rem' }}>
-                  <SenseiWuIcon className="sensei-avatar" />
-                  <div className="help-box">
-                    <p>Całkowita energia to po prostu suma kwadratów wszystkich próbek. Podnieś każdą liczbę ze zbioru x(n) do kwadratu (minus zniknie) i dodaj je do siebie.</p>
-                  </div>
-                </div>
-              )}
-              {state.showSolution_energia && (
-                <div className="solution-box" style={{ marginTop: '1rem' }}>
-                  <span>Odpowiedź: E = {state.sumaX_energia.reduce((acc, val) => acc + val * val, 0)}</span>
-                </div>
-              )}
-            </TaskSection>
-          </>
-        )}
-
-        {/* ----------------- FOURIER ----------------- */}
-        {state.mode === 'fourier' && (
-          <>
-            {/* DFT Task */}
-            <TaskSection>
-              <div className="card">
-                <div className="operation-type">1. Dyskretne Przekształcenie Fouriera (DFT, N=4)</div>
-                <div className="array-display">
-                  <span className="array-label">x[n] =</span>
-                  <span className="array-values">[{state.fourierX_dft.join(', ')}]</span>
-                </div>
-                <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '0.5rem 0 0 0' }}>Wpisz liczby zespolone dla prążków widma (np. -2+2j, 10, -j).</p>
-              </div>
-              <div className="input-group">
-                <div className="answers-row" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '0.5rem' }}>
-                  {state.userFourierAnswers.map((val, idx) => (
-                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                      <span style={{ fontFamily: 'Fira Code', fontSize: '1.25rem', width: '4.5rem', fontWeight: 800, whiteSpace: 'nowrap' }}>X[{idx}] = </span>
-                      <input type="text" style={{ width: '8rem' }} className="answer-box" value={val}
-                        onChange={(e) => { const newAns = [...state.userFourierAnswers]; newAns[idx] = e.target.value; setState(s => ({ ...s, userFourierAnswers: newAns, isCorrect_dft: null })); }}
-                        onKeyDown={(e) => { if (e.key === 'Enter') handleCheck('dft'); }} />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <TaskControls
-                onCheck={() => handleCheck('dft')}
-                showSolution={state.showSolution_dft} onToggleSolution={() => setState(s => ({ ...s, showSolution_dft: !s.showSolution_dft }))}
-                showHelp={state.showHelp_dft} onToggleHelp={() => setState(s => ({ ...s, showHelp_dft: !s.showHelp_dft }))}
-              />
-              <TaskResult isCorrect={state.isCorrect_dft} />
-
-              {state.showHelp_dft && (
-                <div className="sensei-container" style={{ marginTop: '1rem' }}>
-                  <SenseiWuIcon className="sensei-avatar" />
-                  <div className="help-box">
-                    <ul>
-                      <li><strong>X[0]</strong> = x[0] + x[1] + x[2] + x[3]</li>
-                      <li><strong>X[1]</strong> = (x[0] - x[2]) + j(x[3] - x[1])</li>
-                      <li><strong>X[2]</strong> = x[0] - x[1] + x[2] - x[3]</li>
-                      <li><strong>X[3]</strong> = (x[0] - x[2]) + j(x[1] - x[3])</li>
-                    </ul>
-                  </div>
-                </div>
-              )}
-              {state.showSolution_dft && (
-                <div className="solution-box" style={{ marginTop: '1rem' }}>
-                  {calculateDFT4(state.fourierX_dft).map((c, i) => <div key={i}>X[{i}] = {formatComplex(c)}</div>)}
-                </div>
-              )}
-            </TaskSection>
-
-            {/* IDFT Task */}
-            <TaskSection>
-              <div className="card">
-                <div className="operation-type">2. Odwrotne Dyskretne Przekształcenie Fouriera (IDFT)</div>
-                <div className="array-display">
-                  <span className="array-label">X[k] =</span>
-                  <span className="array-values" style={{ fontSize: '1rem', padding: '0.75rem' }}>
-                    [{calculateDFT4(state.fourierX_idft).map(c => formatComplex(c)).join(', ')}]
-                  </span>
-                </div>
-                <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '0.5rem 0 0 0' }}>Wyznacz oryginalny ciąg x[n] (dla N=4) na podstawie X[k]. Wynik to zwykłe liczby całkowite!</p>
-              </div>
-              <div className="input-group">
-                <div className="answers-row">
-                  {state.userFourierAnswersIDFT.map((val, idx) => (
+                  {state.userSuma.map((val, idx) => (
                     <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                      <span style={{ fontFamily: 'Fira Code', fontSize: '1.15rem', fontWeight: 800, whiteSpace: 'nowrap' }}>x[{idx}]=</span>
+                      <span style={{ fontFamily: 'Fira Code', fontSize: '1.15rem', fontWeight: 800, whiteSpace: 'nowrap' }}>x{idx + 1}:</span>
                       <input type="text" className="answer-box" style={{ width: '4rem', height: '3.5rem', fontSize: '1.25rem' }} value={val}
-                        onChange={(e) => { const newAns = [...state.userFourierAnswersIDFT]; newAns[idx] = e.target.value; setState(s => ({ ...s, userFourierAnswersIDFT: newAns, isCorrect_idft: null })); }}
-                        onKeyDown={(e) => { if (e.key === 'Enter') handleCheck('idft'); }} />
+                        onChange={(e) => { const newAns = [...state.userSuma]; newAns[idx] = e.target.value; setState(s => ({ ...s, userSuma: newAns, isCorrect_suma: null })); }}
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleCheck('suma'); }} />
                     </div>
                   ))}
                 </div>
               </div>
-
               <TaskControls
-                onCheck={() => handleCheck('idft')}
-                showSolution={state.showSolution_idft} onToggleSolution={() => setState(s => ({ ...s, showSolution_idft: !s.showSolution_idft }))}
-                showHelp={state.showHelp_idft} onToggleHelp={() => setState(s => ({ ...s, showHelp_idft: !s.showHelp_idft }))}
+                onCheck={() => handleCheck('suma')}
+                showSolution={state.showSolution_suma} onToggleSolution={() => setState(s => ({ ...s, showSolution_suma: !s.showSolution_suma }))}
+                showHelp={state.showHelp_suma} onToggleHelp={() => setState(s => ({ ...s, showHelp_suma: !s.showHelp_suma }))}
               />
-              <TaskResult isCorrect={state.isCorrect_idft} />
-
-              {state.showHelp_idft && (
+              <TaskResult isCorrect={state.isCorrect_suma} />
+              {state.showHelp_suma && (
                 <div className="sensei-container" style={{ marginTop: '1rem' }}>
                   <SenseiWuIcon className="sensei-avatar" />
                   <div className="help-box">
-                    <p>Wzory są podobne do DFT, ale zmieniamy znak przed j i dzielimy wszystko przez 4:</p>
-                    <ul>
-                      <li><strong>x[0]</strong> = 1/4 · (X[0] + X[1] + X[2] + X[3])</li>
-                      <li><strong>x[1]</strong> = 1/4 · (X[0] + jX[1] - X[2] - jX[3])</li>
-                      <li><strong>x[2]</strong> = 1/4 · (X[0] - X[1] + X[2] - X[3])</li>
-                      <li><strong>x[3]</strong> = 1/4 · (X[0] - jX[1] - X[2] + jX[3])</li>
-                    </ul>
+                    <p>Suma zbiorów rozmytych (standardowa t-konorma, operator MAX): Dla każdego elementu wybierz <strong>większą</strong> wartość przynależności z obu zbiorów. Wzór: μ<sub>A∪B</sub>(x) = max(μ<sub>A</sub>(x), μ<sub>B</sub>(x)).</p>
                   </div>
                 </div>
               )}
-              {state.showSolution_idft && (
+              {state.showSolution_suma && (
                 <div className="solution-box" style={{ marginTop: '1rem' }}>
-                  <span>Odpowiedź: x[n] = [{state.fourierX_idft.join(', ')}]</span>
-                </div>
-              )}
-            </TaskSection>
-          </>
-        )}
-
-        {/* ----------------- PRÓBKOWANIE ----------------- */}
-        {state.mode === 'probkowanie' && (
-          <>
-            {/* Nyquist Task */}
-            <TaskSection>
-              <div className="card">
-                <div className="operation-type">1. Twierdzenie o próbkowaniu (Nyquista)</div>
-                <div className="array-display">
-                  <span className="array-label" style={{ fontSize: '1.15rem' }}>
-                    x(t) = {state.probkowanieA1}sin({state.probkowanieF1 * 2}πt) + {state.probkowanieA2}cos({state.probkowanieF2 * 2}πt)
-                  </span>
-                </div>
-                <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '0.5rem 0 0 0' }}>Podaj minimalną częstotliwość próbkowania f<sub>s</sub>, aby uniknąć zjawiska aliasingu.</p>
-              </div>
-              <div className="input-group">
-                <div className="answers-row">
-                  <input type="text" className="answer-box" style={{ width: '8rem' }} value={state.userProbkowanieNyquistAnswer || ''}
-                    onChange={(e) => setState(s => ({ ...s, userProbkowanieNyquistAnswer: e.target.value, isCorrect_nyquist: null }))}
-                    onKeyDown={(e) => e.key === 'Enter' && handleCheck('nyquist')} />
-                  <span style={{ alignSelf: 'center', fontWeight: 800, fontSize: '1.25rem' }}>Hz</span>
-                </div>
-              </div>
-
-              <TaskControls
-                onCheck={() => handleCheck('nyquist')}
-                showSolution={state.showSolution_nyquist} onToggleSolution={() => setState(s => ({ ...s, showSolution_nyquist: !s.showSolution_nyquist }))}
-                showHelp={state.showHelp_nyquist} onToggleHelp={() => setState(s => ({ ...s, showHelp_nyquist: !s.showHelp_nyquist }))}
-              />
-              <TaskResult isCorrect={state.isCorrect_nyquist} />
-
-              {state.showHelp_nyquist && (
-                <div className="sensei-container" style={{ marginTop: '1rem' }}>
-                  <SenseiWuIcon className="sensei-avatar" />
-                  <div className="help-box">
-                    <p>Minimalne f<sub>s</sub> musi być co najmniej 2x większe niż najwyższa częstotliwość w sygnale (f<sub>max</sub>).</p>
-                    <p>Podziel wartość widoczną przed "πt" przez 2, aby uzyskać f dla każdego składnika. Wybierz największe f, a potem pomnóż przez 2. (Zauważ: odpowiedź to po prostu największa liczba przed πt!)</p>
-                  </div>
-                </div>
-              )}
-              {state.showSolution_nyquist && (
-                <div className="solution-box" style={{ marginTop: '1rem' }}>
-                  <span>Odpowiedź: f<sub>s</sub> = {2 * Math.max(state.probkowanieF1, state.probkowanieF2)} Hz</span>
+                  <span>Odpowiedź: A ∪ B = {formatSet(fuzzyUnion(state.A_operacje, state.B_operacje))}</span>
                 </div>
               )}
             </TaskSection>
 
-            {/* Aliasing Task */}
+            {/* Iloczyn */}
             <TaskSection>
               <div className="card">
-                <div className="operation-type">2. Zjawisko Aliasingu</div>
-                <div className="array-display">
-                  <span className="array-label" style={{ fontSize: '1.15rem' }}>
-                    f<sub>in</sub> = {state.probkowanieF_in} Hz, f<sub>s</sub> = {state.probkowanieF_s} Hz
-                  </span>
-                </div>
-                <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '0.5rem 0 0 0' }}>Sygnał próbkowany ze zbyt niską f<sub>s</sub>. Oblicz częstotliwość pozorną (alias).</p>
+                <div className="operation-type">2. Iloczyn (Przekrój) Zbiorów (A ∩ B)</div>
               </div>
               <div className="input-group">
                 <div className="answers-row">
-                  <input type="text" className="answer-box" style={{ width: '8rem' }} value={state.userProbkowanieAliasingAnswer || ''}
-                    onChange={(e) => setState(s => ({ ...s, userProbkowanieAliasingAnswer: e.target.value, isCorrect_aliasing: null }))}
-                    onKeyDown={(e) => e.key === 'Enter' && handleCheck('aliasing')} />
-                  <span style={{ alignSelf: 'center', fontWeight: 800, fontSize: '1.25rem' }}>Hz</span>
-                </div>
-              </div>
-
-              <TaskControls
-                onCheck={() => handleCheck('aliasing')}
-                showSolution={state.showSolution_aliasing} onToggleSolution={() => setState(s => ({ ...s, showSolution_aliasing: !s.showSolution_aliasing }))}
-                showHelp={state.showHelp_aliasing} onToggleHelp={() => setState(s => ({ ...s, showHelp_aliasing: !s.showHelp_aliasing }))}
-              />
-              <TaskResult isCorrect={state.isCorrect_aliasing} />
-
-              {state.showHelp_aliasing && (
-                <div className="sensei-container" style={{ marginTop: '1rem' }}>
-                  <SenseiWuIcon className="sensei-avatar" />
-                  <div className="help-box">
-                    <p>Wzór: <strong>f<sub>alias</sub> = | f<sub>in</sub> - N · f<sub>s</sub> |</strong></p>
-                    <p>Odejmuj (lub dodawaj) f<sub>s</sub> od f<sub>in</sub> dopóki wynik (bez znaku minus) nie znajdzie się w przedziale od 0 do f<sub>s</sub> / 2.</p>
-                  </div>
-                </div>
-              )}
-              {state.showSolution_aliasing && (
-                <div className="solution-box" style={{ marginTop: '1rem' }}>
-                  <span>Odpowiedź: f<sub>alias</sub> = {Math.abs(state.probkowanieF_in - state.probkowanieF_s * Math.round(state.probkowanieF_in / state.probkowanieF_s))} Hz</span>
-                </div>
-              )}
-            </TaskSection>
-          </>
-        )}
-
-        {/* ----------------- KWANTYZACJA ----------------- */}
-        {state.mode === 'kwantyzacja' && (
-          <>
-            {/* Krok Task */}
-            <TaskSection>
-              <div className="card">
-                <div className="operation-type">1. Krok Kwantyzacji (Rozdzielczość)</div>
-                <div className="array-display">
-                  <span className="array-label" style={{ fontSize: '1.15rem' }}>
-                    Zakres Napięć: [{state.kwantyzacjaUmin} V, {state.kwantyzacjaUmax} V], Liczba bitów b = {state.kwantyzacjaBitsKrok}
-                  </span>
-                </div>
-                <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '0.5rem 0 0 0' }}>Oblicz krok kwantyzacji Δ.</p>
-              </div>
-              <div className="input-group">
-                <div className="answers-row">
-                  <span style={{ fontWeight: 800, fontSize: '1.5rem', color: 'var(--text-dark)' }}>Δ ≈ </span>
-                  <input type="text" className="answer-box" style={{ width: '8rem' }} value={state.userKwantyzacjaKrok || ''}
-                    onChange={(e) => setState(s => ({ ...s, userKwantyzacjaKrok: e.target.value, isCorrect_kwantyzacjaKrok: null }))}
-                    onKeyDown={(e) => e.key === 'Enter' && handleCheck('kwantyzacjaKrok')} />
-                  <span style={{ alignSelf: 'center', fontWeight: 800, fontSize: '1.25rem' }}>V</span>
-                </div>
-              </div>
-
-              <TaskControls
-                onCheck={() => handleCheck('kwantyzacjaKrok')}
-                showSolution={state.showSolution_kwantyzacjaKrok} onToggleSolution={() => setState(s => ({ ...s, showSolution_kwantyzacjaKrok: !s.showSolution_kwantyzacjaKrok }))}
-                showHelp={state.showHelp_kwantyzacjaKrok} onToggleHelp={() => setState(s => ({ ...s, showHelp_kwantyzacjaKrok: !s.showHelp_kwantyzacjaKrok }))}
-              />
-              <TaskResult isCorrect={state.isCorrect_kwantyzacjaKrok} />
-
-              {state.showHelp_kwantyzacjaKrok && (
-                <div className="sensei-container" style={{ marginTop: '1rem' }}>
-                  <SenseiWuIcon className="sensei-avatar" />
-                  <div className="help-box">
-                    <p>Aby obliczyć krok kwantyzacji, użyj wzoru: <strong>Δ = (U<sub>max</sub> - U<sub>min</sub>) / 2<sup>b</sup></strong>.</p>
-                    <p>Oblicz różnicę między najwyższym i najniższym napięciem, a następnie podziel przez liczbę stanów (2 do potęgi liczby bitów). Aplikacja uzna wynik za poprawny, jeśli pomylisz się o drobną część dziesiętną.</p>
-                  </div>
-                </div>
-              )}
-              {state.showSolution_kwantyzacjaKrok && (
-                <div className="solution-box" style={{ marginTop: '1rem' }}>
-                  <span>Odpowiedź: Δ ≈ {((state.kwantyzacjaUmax - state.kwantyzacjaUmin) / Math.pow(2, state.kwantyzacjaBitsKrok)).toFixed(4)} V</span>
-                </div>
-              )}
-            </TaskSection>
-
-            {/* SQNR Task */}
-            <TaskSection>
-              <div className="card">
-                <div className="operation-type">2. Stosunek Sygnału do Szumu Kwantyzacji (SQNR)</div>
-                <div className="array-display">
-                  <span className="array-label" style={{ fontSize: '1.15rem' }}>
-                    Liczba bitów b = {state.kwantyzacjaSqnrBits}
-                  </span>
-                </div>
-                <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '0.5rem 0 0 0' }}>Wyznacz teoretyczny SQNR w decybelach (dB) dla przetwornika.</p>
-              </div>
-              <div className="input-group">
-                <div className="answers-row">
-                  <span style={{ fontWeight: 800, fontSize: '1.5rem', color: 'var(--text-dark)' }}>SQNR ≈ </span>
-                  <input type="text" className="answer-box" style={{ width: '8rem' }} value={state.userKwantyzacjaSqnr || ''}
-                    onChange={(e) => setState(s => ({ ...s, userKwantyzacjaSqnr: e.target.value, isCorrect_kwantyzacjaSqnr: null }))}
-                    onKeyDown={(e) => e.key === 'Enter' && handleCheck('kwantyzacjaSqnr')} />
-                  <span style={{ alignSelf: 'center', fontWeight: 800, fontSize: '1.25rem' }}>dB</span>
-                </div>
-              </div>
-
-              <TaskControls
-                onCheck={() => handleCheck('kwantyzacjaSqnr')}
-                showSolution={state.showSolution_kwantyzacjaSqnr} onToggleSolution={() => setState(s => ({ ...s, showSolution_kwantyzacjaSqnr: !s.showSolution_kwantyzacjaSqnr }))}
-                showHelp={state.showHelp_kwantyzacjaSqnr} onToggleHelp={() => setState(s => ({ ...s, showHelp_kwantyzacjaSqnr: !s.showHelp_kwantyzacjaSqnr }))}
-              />
-              <TaskResult isCorrect={state.isCorrect_kwantyzacjaSqnr} />
-
-              {state.showHelp_kwantyzacjaSqnr && (
-                <div className="sensei-container" style={{ marginTop: '1rem' }}>
-                  <SenseiWuIcon className="sensei-avatar" />
-                  <div className="help-box">
-                    <p>Wzór dla pełnego obciążenia to w przybliżeniu: <strong>SQNR ≈ 6.02 · b + 1.76 [dB]</strong>.</p>
-                    <p>Pomnóż liczbę bitów przez 6.02 i dodaj 1.76. Możesz też dla prostoty pomnożyć przez 6. Aplikacja zaakceptuje niewielkie przybliżenia (odchylenie o +- 0.5).</p>
-                  </div>
-                </div>
-              )}
-              {state.showSolution_kwantyzacjaSqnr && (
-                <div className="solution-box" style={{ marginTop: '1rem' }}>
-                  <span>Odpowiedź: SQNR ≈ {(6.02 * state.kwantyzacjaSqnrBits + 1.76).toFixed(2)} dB</span>
-                </div>
-              )}
-            </TaskSection>
-          </>
-        )}
-
-        {/* ----------------- FILTRACJA ----------------- */}
-        {state.mode === 'filtracja' && (
-          <>
-            {/* Wyjscie Task */}
-            <TaskSection>
-              <div className="card">
-                <div className="operation-type">1. Filtr FIR - Sygnał Wyjściowy</div>
-                <div className="array-display">
-                  <span className="array-label" style={{ fontSize: '1.15rem' }}>
-                    y[n] = {state.filtracjaWyjscieA}·x[n] {state.filtracjaWyjscieB > 0 ? '+' : '-'} {Math.abs(state.filtracjaWyjscieB)}·x[n-1]
-                  </span>
-                </div>
-                <div className="array-display">
-                  <span className="array-label">x[n] =</span>
-                  <span className="array-values">[{state.filtracjaWyjscieX.join(', ')}]</span>
-                </div>
-                <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '0.5rem 0 0 0' }}>Podaj cztery pierwsze próbki sygnału wyjściowego y[0], y[1], y[2], y[3]. Załóż, że x[-1] = 0.</p>
-              </div>
-              <div className="input-group">
-                <div className="answers-row">
-                  {state.userFiltracjaWyjscie.map((val, idx) => (
+                  {state.userIloczyn.map((val, idx) => (
                     <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                      <span style={{ fontFamily: 'Fira Code', fontSize: '1.15rem', fontWeight: 800, whiteSpace: 'nowrap' }}>y[{idx}]=</span>
+                      <span style={{ fontFamily: 'Fira Code', fontSize: '1.15rem', fontWeight: 800, whiteSpace: 'nowrap' }}>x{idx + 1}:</span>
                       <input type="text" className="answer-box" style={{ width: '4rem', height: '3.5rem', fontSize: '1.25rem' }} value={val}
-                        onChange={(e) => { const newAns = [...state.userFiltracjaWyjscie]; newAns[idx] = e.target.value; setState(s => ({ ...s, userFiltracjaWyjscie: newAns, isCorrect_filtracjaWyjscie: null })); }}
-                        onKeyDown={(e) => { if (e.key === 'Enter') handleCheck('filtracjaWyjscie'); }} />
+                        onChange={(e) => { const newAns = [...state.userIloczyn]; newAns[idx] = e.target.value; setState(s => ({ ...s, userIloczyn: newAns, isCorrect_iloczyn: null })); }}
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleCheck('iloczyn'); }} />
                     </div>
                   ))}
                 </div>
               </div>
-
               <TaskControls
-                onCheck={() => handleCheck('filtracjaWyjscie')}
-                showSolution={state.showSolution_filtracjaWyjscie} onToggleSolution={() => setState(s => ({ ...s, showSolution_filtracjaWyjscie: !s.showSolution_filtracjaWyjscie }))}
-                showHelp={state.showHelp_filtracjaWyjscie} onToggleHelp={() => setState(s => ({ ...s, showHelp_filtracjaWyjscie: !s.showHelp_filtracjaWyjscie }))}
+                onCheck={() => handleCheck('iloczyn')}
+                showSolution={state.showSolution_iloczyn} onToggleSolution={() => setState(s => ({ ...s, showSolution_iloczyn: !s.showSolution_iloczyn }))}
+                showHelp={state.showHelp_iloczyn} onToggleHelp={() => setState(s => ({ ...s, showHelp_iloczyn: !s.showHelp_iloczyn }))}
               />
-              <TaskResult isCorrect={state.isCorrect_filtracjaWyjscie} />
-
-              {state.showHelp_filtracjaWyjscie && (
+              <TaskResult isCorrect={state.isCorrect_iloczyn} />
+              {state.showHelp_iloczyn && (
                 <div className="sensei-container" style={{ marginTop: '1rem' }}>
                   <SenseiWuIcon className="sensei-avatar" />
                   <div className="help-box">
-                    <p>Aby obliczyć próbkę y[n], podstaw do wzoru odpowiednie wartości z tablicy x[n].</p>
-                    <ul>
-                      <li>Dla n=0: x[0] to pierwsza liczba w tablicy, a x[-1] przyjmujemy jako 0.</li>
-                      <li>Dla n=1: używasz x[1] oraz x[0], itd.</li>
-                    </ul>
+                    <p>Iloczyn zbiorów rozmytych (standardowa t-norma, operator MIN): Dla każdego elementu wybierz <strong>mniejszą</strong> wartość przynależności. Wzór: μ<sub>A∩B</sub>(x) = min(μ<sub>A</sub>(x), μ<sub>B</sub>(x)).</p>
                   </div>
                 </div>
               )}
-              {state.showSolution_filtracjaWyjscie && (
+              {state.showSolution_iloczyn && (
                 <div className="solution-box" style={{ marginTop: '1rem' }}>
-                  <span>Odpowiedź: y[n] = {[
-                    state.filtracjaWyjscieA * state.filtracjaWyjscieX[0],
-                    state.filtracjaWyjscieA * state.filtracjaWyjscieX[1] + state.filtracjaWyjscieB * state.filtracjaWyjscieX[0],
-                    state.filtracjaWyjscieA * state.filtracjaWyjscieX[2] + state.filtracjaWyjscieB * state.filtracjaWyjscieX[1],
-                    state.filtracjaWyjscieA * state.filtracjaWyjscieX[3] + state.filtracjaWyjscieB * state.filtracjaWyjscieX[2]
-                  ].join(', ')}</span>
+                  <span>Odpowiedź: A ∩ B = {formatSet(fuzzyIntersection(state.A_operacje, state.B_operacje))}</span>
                 </div>
               )}
             </TaskSection>
 
-            {/* IIR Task */}
+            {/* Dopełnienie */}
             <TaskSection>
               <div className="card">
-                <div className="operation-type">2. Odpowiedź Impulsowa (Filtr IIR)</div>
-                <div className="array-display">
-                  <span className="array-label" style={{ fontSize: '1.15rem' }}>
-                    y[n] = {state.filtracjaIIRA}·x[n] {state.filtracjaIIRB > 0 ? '+' : '-'} {Math.abs(state.filtracjaIIRB)}·y[n-1]
-                  </span>
-                </div>
-                <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '0.5rem 0 0 0' }}>Oblicz pierwsze 3 próbki odpowiedzi impulsowej filtru: h[0], h[1], h[2]. Przypominamy, że h[-1] = 0.</p>
+                <div className="operation-type">3. Dopełnienie Zbioru (A<sup>c</sup>)</div>
+                <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '0.5rem 0 0 0' }}>Wyznacz dopełnienie zbioru A.</p>
               </div>
               <div className="input-group">
                 <div className="answers-row">
-                  {state.userFiltracjaIIR.map((val, idx) => (
+                  {state.userDopelnienie.map((val, idx) => (
                     <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                      <span style={{ fontFamily: 'Fira Code', fontSize: '1.15rem', fontWeight: 800, whiteSpace: 'nowrap' }}>h[{idx}]=</span>
+                      <span style={{ fontFamily: 'Fira Code', fontSize: '1.15rem', fontWeight: 800, whiteSpace: 'nowrap' }}>x{idx + 1}:</span>
                       <input type="text" className="answer-box" style={{ width: '4rem', height: '3.5rem', fontSize: '1.25rem' }} value={val}
-                        onChange={(e) => { const newAns = [...state.userFiltracjaIIR]; newAns[idx] = e.target.value; setState(s => ({ ...s, userFiltracjaIIR: newAns, isCorrect_filtracjaIIR: null })); }}
-                        onKeyDown={(e) => { if (e.key === 'Enter') handleCheck('filtracjaIIR'); }} />
+                        onChange={(e) => { const newAns = [...state.userDopelnienie]; newAns[idx] = e.target.value; setState(s => ({ ...s, userDopelnienie: newAns, isCorrect_dopelnienie: null })); }}
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleCheck('dopelnienie'); }} />
                     </div>
                   ))}
                 </div>
               </div>
-
               <TaskControls
-                onCheck={() => handleCheck('filtracjaIIR')}
-                showSolution={state.showSolution_filtracjaIIR} onToggleSolution={() => setState(s => ({ ...s, showSolution_filtracjaIIR: !s.showSolution_filtracjaIIR }))}
-                showHelp={state.showHelp_filtracjaIIR} onToggleHelp={() => setState(s => ({ ...s, showHelp_filtracjaIIR: !s.showHelp_filtracjaIIR }))}
+                onCheck={() => handleCheck('dopelnienie')}
+                showSolution={state.showSolution_dopelnienie} onToggleSolution={() => setState(s => ({ ...s, showSolution_dopelnienie: !s.showSolution_dopelnienie }))}
+                showHelp={state.showHelp_dopelnienie} onToggleHelp={() => setState(s => ({ ...s, showHelp_dopelnienie: !s.showHelp_dopelnienie }))}
               />
-              <TaskResult isCorrect={state.isCorrect_filtracjaIIR} />
-
-              {state.showHelp_filtracjaIIR && (
+              <TaskResult isCorrect={state.isCorrect_dopelnienie} />
+              {state.showHelp_dopelnienie && (
                 <div className="sensei-container" style={{ marginTop: '1rem' }}>
                   <SenseiWuIcon className="sensei-avatar" />
                   <div className="help-box">
-                    <p>Aby policzyć odpowiedź impulsową <strong>h[n]</strong>, wyobraź sobie, że na wejście x[n] wpada tylko jedna "1" na samym początku (dla n=0), a potem same zera.</p>
-                    <ul>
-                      <li><strong>Dla n=0:</strong> Wstawiasz jedynkę za x[0]. Poprzedniej próbki nie było (y[-1]=0). Zatem wynik to po prostu współczynnik przy x[n]: <strong>h[0] = {state.filtracjaIIRA}</strong>.</li>
-                      <li><strong>Dla n &gt; 0:</strong> Na wejściu są już same zera, więc człon z x[n] znika! Każdy kolejny wynik otrzymujesz po prostu mnożąc <strong>poprzedni wynik</strong> przez współczynnik przy y[n-1].</li>
-                      <li>Czyli <strong>h[1]</strong> = {state.filtracjaIIRB > 0 ? '' : '-'} {Math.abs(state.filtracjaIIRB)} · h[0], a <strong>h[2]</strong> = {state.filtracjaIIRB > 0 ? '' : '-'} {Math.abs(state.filtracjaIIRB)} · h[1].</li>
-                    </ul>
+                    <p>Dopełnienie zbioru to po prostu odjęcie wartości przynależności od jedności. Wzór: μ<sub>A<sup>c</sup></sub>(x) = 1 - μ<sub>A</sub>(x).</p>
                   </div>
                 </div>
               )}
-              {state.showSolution_filtracjaIIR && (
+              {state.showSolution_dopelnienie && (
                 <div className="solution-box" style={{ marginTop: '1rem' }}>
-                  <span>Odpowiedź: h[n] = {[
-                    state.filtracjaIIRA,
-                    state.filtracjaIIRA * state.filtracjaIIRB,
-                    state.filtracjaIIRA * state.filtracjaIIRB * state.filtracjaIIRB
-                  ].join(', ')}</span>
+                  <span>Odpowiedź: A<sup>c</sup> = {formatSet(fuzzyComplement(state.A_operacje))}</span>
                 </div>
               )}
             </TaskSection>
           </>
         )}
 
-        {/* ----------------- KOMPRESJA ----------------- */}
-        {state.mode === 'kompresja' && (
+        {/* ----------------- PRZEKROJE ----------------- */}
+        {state.mode === 'przekroje' && (
           <>
-            {/* Hamming Task */}
+            <div className="card" style={{ marginBottom: '1.5rem' }}>
+              <div className="operation-type">Zbiór rozmyty A w przestrzeni X</div>
+              <div className="array-display">
+                <span className="array-label">A =</span>
+                <span className="array-values">{formatSet(state.A_przekroje)}</span>
+              </div>
+            </div>
+
+            {/* Alpha cut */}
             <TaskSection>
               <div className="card">
-                <div className="operation-type">1. Kodowanie Hamminga (7,4)</div>
-                <div className="array-display">
-                  <span className="array-label" style={{ fontSize: '1.15rem' }}>
-                    Słowo informacyjne d: [{state.kompresjaHammingData.join(' ')}]
-                  </span>
-                </div>
-                <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '0.5rem 0 0 0' }}>Oblicz 3 bity parzystości (p1, p2, p3) dla danych d1, d2, d3, d4.</p>
+                <div className="operation-type">Ostry α-przekrój (α = {state.alpha.toFixed(1)})</div>
+                <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '0.5rem 0 0 0' }}>Wpisz 1, jeśli element należy do przekroju, w przeciwnym razie wpisz 0.</p>
               </div>
               <div className="input-group">
                 <div className="answers-row">
-                  {state.userKompresjaHamming.map((val, idx) => (
+                  {state.userPrzekroj.map((val, idx) => (
                     <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                      <span style={{ fontFamily: 'Fira Code', fontSize: '1.15rem', fontWeight: 800, whiteSpace: 'nowrap' }}>p{idx + 1}=</span>
+                      <span style={{ fontFamily: 'Fira Code', fontSize: '1.15rem', fontWeight: 800, whiteSpace: 'nowrap' }}>x{idx + 1}:</span>
                       <input type="text" className="answer-box" style={{ width: '4rem', height: '3.5rem', fontSize: '1.25rem' }} value={val}
-                        onChange={(e) => { const newAns = [...state.userKompresjaHamming]; newAns[idx] = e.target.value; setState(s => ({ ...s, userKompresjaHamming: newAns, isCorrect_kompresjaHamming: null })); }}
-                        onKeyDown={(e) => { if (e.key === 'Enter') handleCheck('kompresjaHamming'); }} />
+                        onChange={(e) => { const newAns = [...state.userPrzekroj]; newAns[idx] = e.target.value; setState(s => ({ ...s, userPrzekroj: newAns, isCorrect_przekroj: null })); }}
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleCheck('przekroj'); }} />
                     </div>
                   ))}
                 </div>
               </div>
-
               <TaskControls
-                onCheck={() => handleCheck('kompresjaHamming')}
-                showSolution={state.showSolution_kompresjaHamming} onToggleSolution={() => setState(s => ({ ...s, showSolution_kompresjaHamming: !s.showSolution_kompresjaHamming }))}
-                showHelp={state.showHelp_kompresjaHamming} onToggleHelp={() => setState(s => ({ ...s, showHelp_kompresjaHamming: !s.showHelp_kompresjaHamming }))}
+                onCheck={() => handleCheck('przekroj')}
+                showSolution={state.showSolution_przekroj} onToggleSolution={() => setState(s => ({ ...s, showSolution_przekroj: !s.showSolution_przekroj }))}
+                showHelp={state.showHelp_przekroj} onToggleHelp={() => setState(s => ({ ...s, showHelp_przekroj: !s.showHelp_przekroj }))}
               />
-              <TaskResult isCorrect={state.isCorrect_kompresjaHamming} />
-
-              {state.showHelp_kompresjaHamming && (
+              <TaskResult isCorrect={state.isCorrect_przekroj} />
+              {state.showHelp_przekroj && (
                 <div className="sensei-container" style={{ marginTop: '1rem' }}>
                   <SenseiWuIcon className="sensei-avatar" />
                   <div className="help-box">
-                    <p>W standardowym kodzie Hamminga (7,4), bity parzystości wyznaczamy za pomocą operacji XOR (czy jest nieparzysta liczba jedynek):</p>
-                    <ul>
-                      <li><strong>p1</strong> zabezpiecza bity d1, d2, d4. Policz jedynki w d1, d2, d4. Jeśli jest ich nieparzysta liczba, p1=1, w przeciwnym razie p1=0.</li>
-                      <li><strong>p2</strong> zabezpiecza bity d1, d3, d4.</li>
-                      <li><strong>p3</strong> zabezpiecza bity d2, d3, d4.</li>
-                    </ul>
+                    <p>α-przekrój to zbiór ostry (klasyczny), do którego wchodzą wszystkie elementy, których przynależność jest <strong>większa lub równa α</strong>. Wstaw 1, jeśli μ(x) ≥ {state.alpha.toFixed(1)}, w przeciwnym razie 0.</p>
                   </div>
                 </div>
               )}
-              {state.showSolution_kompresjaHamming && (
+              {state.showSolution_przekroj && (
                 <div className="solution-box" style={{ marginTop: '1rem' }}>
-                  <span>Odpowiedź: p1 = {state.kompresjaHammingData[0] ^ state.kompresjaHammingData[1] ^ state.kompresjaHammingData[3]},
-                    p2 = {state.kompresjaHammingData[0] ^ state.kompresjaHammingData[2] ^ state.kompresjaHammingData[3]},
-                    p3 = {state.kompresjaHammingData[1] ^ state.kompresjaHammingData[2] ^ state.kompresjaHammingData[3]}</span>
-                </div>
-              )}
-            </TaskSection>
-
-            {/* Shannon-Fano Task */}
-            <TaskSection>
-              <div className="card">
-                <div className="operation-type">2. Kodowanie Shannona-Fano</div>
-                <div className="array-display">
-                  <span className="array-label" style={{ fontSize: '1.15rem' }}>
-                    Prawdopodobieństwa: A={state.kompresjaShannonProbs[0]}%, B={state.kompresjaShannonProbs[1]}%, C={state.kompresjaShannonProbs[2]}%, D={state.kompresjaShannonProbs[3]}%
-                  </span>
-                </div>
-                <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '0.5rem 0 0 0' }}>Skonstruuj kod dla powyższych symboli wpisując odpowiednie ciągi binarne (złożone z 0 i 1).</p>
-              </div>
-              <div className="input-group">
-                <div className="answers-row">
-                  {['A', 'B', 'C', 'D'].map((sym, idx) => (
-                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                      <span style={{ fontFamily: 'Fira Code', fontSize: '1.15rem', fontWeight: 800, whiteSpace: 'nowrap' }}>{sym}=</span>
-                      <input type="text" className="answer-box" style={{ width: '5rem', height: '3.5rem', fontSize: '1.25rem' }} value={state.userKompresjaShannon[idx]}
-                        onChange={(e) => { const newAns = [...state.userKompresjaShannon]; newAns[idx] = e.target.value; setState(s => ({ ...s, userKompresjaShannon: newAns, isCorrect_kompresjaShannon: null })); }}
-                        onKeyDown={(e) => { if (e.key === 'Enter') handleCheck('kompresjaShannon'); }} />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <TaskControls
-                onCheck={() => handleCheck('kompresjaShannon')}
-                showSolution={state.showSolution_kompresjaShannon} onToggleSolution={() => setState(s => ({ ...s, showSolution_kompresjaShannon: !s.showSolution_kompresjaShannon }))}
-                showHelp={state.showHelp_kompresjaShannon} onToggleHelp={() => setState(s => ({ ...s, showHelp_kompresjaShannon: !s.showHelp_kompresjaShannon }))}
-              />
-              <TaskResult isCorrect={state.isCorrect_kompresjaShannon} />
-
-              {state.showHelp_kompresjaShannon && (
-                <div className="sensei-container" style={{ marginTop: '1rem' }}>
-                  <SenseiWuIcon className="sensei-avatar" />
-                  <div className="help-box">
-                    <p>Aby wyznaczyć kod Shannona-Fano:</p>
-                    <ul>
-                      <li>Zawsze dziel pozostałą grupę symboli na dwie części tak, aby <strong>suma prawdopodobieństw</strong> w obu częściach była <strong>jak najbardziej zbliżona do siebie</strong>.</li>
-                      <li>Pierwszy podział to A (50%) oraz B+C+D (50%). Górnej grupie (A) przypisz bit 0, a dolnej (B+C+D) bit 1. (Aplikacja zaliczy wszystkie poprawne kody prefixowe bez względu na to po której stronie dasz 0 a po której 1).</li>
-                      <li>Następnie podziel dolną grupę B+C+D: B (25%) i C+D (25%). Znowu dopisz 0 i 1. Podziel na koniec C i D.</li>
-                    </ul>
-                  </div>
-                </div>
-              )}
-              {state.showSolution_kompresjaShannon && (
-                <div className="solution-box" style={{ marginTop: '1rem' }}>
-                  <span>Przykładowa odpowiedź: A=0, B=10, C=110, D=111</span>
+                  <span>Odpowiedź: α-przekrój = {'{'} {calcAlphaCut(state.A_przekroje, state.alpha).map((v, i) => `${v}/x${i+1}`).join(', ')} {'}'}</span>
                 </div>
               )}
             </TaskSection>
@@ -1417,7 +647,7 @@ function App() {
         </button>
 
         <div style={{ marginTop: '1.5rem', textAlign: 'center', fontStyle: 'italic', color: '#64748b' }}>
-          "Never put off until tomorrow what can be done today!" ~ Sensei Wu
+          "Prawdziwa wiedza ninja nie polega na walce, ale na poznaniu samych siebie... i zbiorów rozmytych." ~ Sensei Wu
         </div>
       </div>
 
