@@ -418,7 +418,7 @@ function App() {
   return (
     <div className={cn("theme-container", themeClass)}>
       <div className="lego-panel">
-        <h1 className="title">Ninja Fuzzy Set</h1>
+        <h1 className="title">NinjaKSR</h1>
         <p className="subtitle" style={{ color: 'var(--theme-primary)' }}>{ninjaQuotes[state.mode]}</p>
 
         <div className="tab-switcher" style={{ marginBottom: '2rem' }}>
