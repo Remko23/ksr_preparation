@@ -311,9 +311,9 @@ function App() {
   if (state.mode === 'przekroje' && state.A_przekroje.length === 0) return null;
 
   const ninjaQuotes: Record<AppMode, string> = {
-    podstawy: '"Zrozumienie fundamentów to pierwszy krok na drodze Mistrza!" ~ Sensei Wu',
-    operacje: '"Prawdziwa siła płynie z łączenia żywiołów!" ~ Kai',
-    przekroje: '"Precyzja cięcia zależy od siły skupienia!" ~ Jay',
+    podstawy: '"Fair? Fair isn\'t a word from where I come from!" ~ Lloyd',
+    operacje: '"Sensei once told me it\'s not the size of the ninja in a fight, but the size of the fight in the ninja" ~ Kai',
+    przekroje: '"ALRIGHT?! WHO TOOK MY PUDDING CUP?" ~ Jay',
   };
 
   const formatSet = (set: number[]) => {
@@ -647,7 +647,7 @@ function App() {
         </button>
 
         <div style={{ marginTop: '1.5rem', textAlign: 'center', fontStyle: 'italic', color: '#64748b' }}>
-          "Prawdziwa wiedza ninja nie polega na walce, ale na poznaniu samych siebie... i zbiorów rozmytych." ~ Sensei Wu
+          "Never put off until tomorrow what can be done today!" ~ Sensei Wu
         </div>
       </div>
 
