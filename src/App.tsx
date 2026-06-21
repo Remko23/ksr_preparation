@@ -7,7 +7,7 @@ export function cn(...inputs: (string | undefined | null | false)[]) {
   return twMerge(clsx(inputs));
 }
 
-type AppMode = 'podstawy' | 'operacje' | 'przekroje';
+type AppMode = 'podstawy' | 'operacje' | 'przekroje' | 'rozszerzone' | 'miary';
 
 interface AppState {
   mode: AppMode;
@@ -57,6 +57,18 @@ interface AppState {
   showHelp_przekroj: boolean;
   userPrzekroj: string[];
 
+  // Rozszerzone mode
+  A_rozszerzone: number[];
+  B_rozszerzone: number[];
+  isCorrect_roznica: boolean | null; showSolution_roznica: boolean; showHelp_roznica: boolean; userRoznica: string[];
+  isCorrect_einstein: boolean | null; showSolution_einstein: boolean; showHelp_einstein: boolean; userEinstein: string[];
+
+  // Miary mode
+  A_miary: number[];
+  S_miary: number[]; // Do miary T1
+  isCorrect_in: boolean | null; showSolution_in: boolean; showHelp_in: boolean; userIn: string;
+  isCorrect_t1: boolean | null; showSolution_t1: boolean; showHelp_t1: boolean; userT1: string;
+
   alertMsg: string | null;
 }
 
@@ -71,6 +83,17 @@ const fuzzyUnion = (A: number[], B: number[]) => A.map((a, i) => Math.max(a, B[i
 const fuzzyIntersection = (A: number[], B: number[]) => A.map((a, i) => Math.min(a, B[i]));
 const fuzzyComplement = (A: number[]) => A.map(a => round1(1 - a));
 const calcAlphaCut = (A: number[], alpha: number) => A.map(a => a >= alpha ? 1 : 0);
+
+// Nowe funkcje:
+const fuzzyDifference = (A: number[], B: number[]) => A.map((a, i) => round1(Math.min(a, 1 - B[i])));
+const fuzzyEinsteinSum = (A: number[], B: number[]) => A.map((a, i) => round1((a + B[i]) / (1 + a * B[i])));
+
+const calcIn = (A: number[]) => round1(calcSuppSize(A) / A.length);
+const calcT1 = (S: number[]) => {
+  const r = S.reduce((acc, val) => acc + val, 0);
+  const proportion = r / S.length;
+  return round1(proportion * proportion); // Q(x) = x^2 (Względny)
+};
 
 // Custom Ninja Icons
 const SenseiWuIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -183,6 +206,16 @@ function App() {
     A_przekroje: [], alpha: 0,
     isCorrect_przekroj: null, showSolution_przekroj: false, showHelp_przekroj: false, userPrzekroj: [],
 
+    // Rozszerzone
+    A_rozszerzone: [], B_rozszerzone: [],
+    isCorrect_roznica: null, showSolution_roznica: false, showHelp_roznica: false, userRoznica: [],
+    isCorrect_einstein: null, showSolution_einstein: false, showHelp_einstein: false, userEinstein: [],
+
+    // Miary
+    A_miary: [], S_miary: [],
+    isCorrect_in: null, showSolution_in: false, showHelp_in: false, userIn: '',
+    isCorrect_t1: null, showSolution_t1: false, showHelp_t1: false, userT1: '',
+
     alertMsg: null,
   });
 
@@ -216,6 +249,24 @@ function App() {
         A_przekroje: generateFuzzySet(len),
         alpha: round1(Math.random() * 0.8 + 0.1), // alpha od 0.1 do 0.9
         isCorrect_przekroj: null, showSolution_przekroj: false, showHelp_przekroj: false, userPrzekroj: new Array(len).fill(''),
+      }));
+    } else if (currentMode === 'rozszerzone') {
+      setState(s => ({
+        ...s,
+        mode: 'rozszerzone',
+        A_rozszerzone: generateFuzzySet(len),
+        B_rozszerzone: generateFuzzySet(len),
+        isCorrect_roznica: null, showSolution_roznica: false, showHelp_roznica: false, userRoznica: new Array(len).fill(''),
+        isCorrect_einstein: null, showSolution_einstein: false, showHelp_einstein: false, userEinstein: new Array(len).fill(''),
+      }));
+    } else if (currentMode === 'miary') {
+      setState(s => ({
+        ...s,
+        mode: 'miary',
+        A_miary: generateFuzzySet(len),
+        S_miary: generateFuzzySet(len),
+        isCorrect_in: null, showSolution_in: false, showHelp_in: false, userIn: '',
+        isCorrect_t1: null, showSolution_t1: false, showHelp_t1: false, userT1: '',
       }));
     }
   };
@@ -295,11 +346,51 @@ function App() {
       const isMatch = parsed.every((val, i) => val === correct[i]);
       setState(s => ({ ...s, isCorrect_przekroj: isMatch }));
     }
+    // ROZSZERZONE
+    else if (taskType === 'roznica') {
+      const parsed = state.userRoznica.map(s => parseFloat(s.trim().replace(',', '.')));
+      if (parsed.some(isNaN)) {
+        setState(s => ({ ...s, alertMsg: 'Wypełnij wszystkie okienka poprawnymi liczbami.' }));
+        return;
+      }
+      const correct = fuzzyDifference(state.A_rozszerzone, state.B_rozszerzone);
+      const isMatch = parsed.every((val, i) => Math.abs(val - correct[i]) < 0.05);
+      setState(s => ({ ...s, isCorrect_roznica: isMatch }));
+    } else if (taskType === 'einstein') {
+      const parsed = state.userEinstein.map(s => parseFloat(s.trim().replace(',', '.')));
+      if (parsed.some(isNaN)) {
+        setState(s => ({ ...s, alertMsg: 'Wypełnij wszystkie okienka poprawnymi liczbami.' }));
+        return;
+      }
+      const correct = fuzzyEinsteinSum(state.A_rozszerzone, state.B_rozszerzone);
+      const isMatch = parsed.every((val, i) => Math.abs(val - correct[i]) < 0.05);
+      setState(s => ({ ...s, isCorrect_einstein: isMatch }));
+    }
+    // MIARY
+    else if (taskType === 'in') {
+      const parsed = parseFloat(state.userIn.trim().replace(',', '.'));
+      if (isNaN(parsed)) {
+        setState(s => ({ ...s, alertMsg: 'Wpisz poprawną liczbę.' }));
+        return;
+      }
+      const correct = calcIn(state.A_miary);
+      setState(s => ({ ...s, isCorrect_in: Math.abs(parsed - correct) < 0.05 }));
+    } else if (taskType === 't1') {
+      const parsed = parseFloat(state.userT1.trim().replace(',', '.'));
+      if (isNaN(parsed)) {
+        setState(s => ({ ...s, alertMsg: 'Wpisz poprawną liczbę.' }));
+        return;
+      }
+      const correct = calcT1(state.S_miary);
+      setState(s => ({ ...s, isCorrect_t1: Math.abs(parsed - correct) < 0.05 }));
+    }
   };
 
   let themeClass = 'theme-lloyd';
   if (state.mode === 'operacje') themeClass = 'theme-kai';
   if (state.mode === 'przekroje') themeClass = 'theme-jay';
+  if (state.mode === 'rozszerzone') themeClass = 'theme-cole';
+  if (state.mode === 'miary') themeClass = 'theme-zane';
 
   useEffect(() => {
     document.body.className = themeClass;
@@ -309,11 +400,15 @@ function App() {
   if (state.mode === 'podstawy' && state.A_podstawy.length === 0) return null;
   if (state.mode === 'operacje' && state.A_operacje.length === 0) return null;
   if (state.mode === 'przekroje' && state.A_przekroje.length === 0) return null;
+  if (state.mode === 'rozszerzone' && state.A_rozszerzone.length === 0) return null;
+  if (state.mode === 'miary' && state.A_miary.length === 0) return null;
 
   const ninjaQuotes: Record<AppMode, string> = {
     podstawy: '"Fair? Fair isn\'t a word from where I come from!" ~ Lloyd',
     operacje: '"Sensei once told me it\'s not the size of the ninja in a fight, but the size of the fight in the ninja" ~ Kai',
     przekroje: '"ALRIGHT?! WHO TOOK MY PUDDING CUP?" ~ Jay',
+    rozszerzone: '"Cake is usually the answer to anything." ~ Cole',
+    miary: '"This isn\'t about numbers, this is about family." ~ Zane',
   };
 
   const formatSet = (set: number[]) => {
@@ -335,6 +430,12 @@ function App() {
           </button>
           <button className={cn("tab-btn", state.mode === 'przekroje' && "active")} onClick={() => switchMode('przekroje')}>
             <NinjaIcon color="#3b82f6" darkColor="#1e3a8a" /> Przekroje
+          </button>
+          <button className={cn("tab-btn", state.mode === 'rozszerzone' && "active")} onClick={() => switchMode('rozszerzone')}>
+            <NinjaIcon color="#334155" darkColor="#0f172a" /> Rozszerzone
+          </button>
+          <button className={cn("tab-btn", state.mode === 'miary' && "active")} onClick={() => switchMode('miary')}>
+            <NinjaIcon color="#e2e8f0" darkColor="#64748b" /> Miary
           </button>
         </div>
 
@@ -635,6 +736,190 @@ function App() {
               {state.showSolution_przekroj && (
                 <div className="solution-box" style={{ marginTop: '1rem' }}>
                   <span>Odpowiedź: α-przekrój = {'{'} {calcAlphaCut(state.A_przekroje, state.alpha).map((v, i) => `${v}/x${i+1}`).join(', ')} {'}'}</span>
+                </div>
+              )}
+            </TaskSection>
+          </>
+        )}
+
+        {/* ----------------- ROZSZERZONE ----------------- */}
+        {state.mode === 'rozszerzone' && (
+          <>
+            <div className="card" style={{ marginBottom: '1.5rem' }}>
+              <div className="operation-type">Zbiory rozmyte A i B w przestrzeni X</div>
+              <div className="array-display">
+                <span className="array-label">A =</span>
+                <span className="array-values">{formatSet(state.A_rozszerzone)}</span>
+              </div>
+              <div className="array-display" style={{ marginTop: '0.5rem' }}>
+                <span className="array-label">B =</span>
+                <span className="array-values">{formatSet(state.B_rozszerzone)}</span>
+              </div>
+            </div>
+
+            {/* Roznica */}
+            <TaskSection>
+              <div className="card">
+                <div className="operation-type">1. Różnica Zbiorów (A \ B)</div>
+                <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '0.5rem 0 0 0' }}>Wpisz wartości różnicy zbiorów $A \cap B^c$.</p>
+              </div>
+              <div className="input-group">
+                <div className="answers-row">
+                  {state.userRoznica.map((val, idx) => (
+                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                      <span style={{ fontFamily: 'Fira Code', fontSize: '1.15rem', fontWeight: 800, whiteSpace: 'nowrap' }}>x{idx + 1}:</span>
+                      <input type="text" className="answer-box" style={{ width: '4rem', height: '3.5rem', fontSize: '1.25rem' }} value={val}
+                        onChange={(e) => { const newAns = [...state.userRoznica]; newAns[idx] = e.target.value; setState(s => ({ ...s, userRoznica: newAns, isCorrect_roznica: null })); }}
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleCheck('roznica'); }} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <TaskControls
+                onCheck={() => handleCheck('roznica')}
+                showSolution={state.showSolution_roznica} onToggleSolution={() => setState(s => ({ ...s, showSolution_roznica: !s.showSolution_roznica }))}
+                showHelp={state.showHelp_roznica} onToggleHelp={() => setState(s => ({ ...s, showHelp_roznica: !s.showHelp_roznica }))}
+              />
+              <TaskResult isCorrect={state.isCorrect_roznica} />
+              {state.showHelp_roznica && (
+                <div className="sensei-container" style={{ marginTop: '1rem' }}>
+                  <SenseiWuIcon className="sensei-avatar" />
+                  <div className="help-box">
+                    <p>Różnicę zbiorów liczymy zwykle jako przecięcie z dopełnieniem: <strong>min(μ<sub>A</sub>(x), 1 - μ<sub>B</sub>(x))</strong>.</p>
+                  </div>
+                </div>
+              )}
+              {state.showSolution_roznica && (
+                <div className="solution-box" style={{ marginTop: '1rem' }}>
+                  <span>Odpowiedź: A \ B = {formatSet(fuzzyDifference(state.A_rozszerzone, state.B_rozszerzone))}</span>
+                </div>
+              )}
+            </TaskSection>
+
+            {/* Suma Einsteina */}
+            <TaskSection>
+              <div className="card">
+                <div className="operation-type">2. Suma Einsteina (A ⊕ B)</div>
+                <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '0.5rem 0 0 0' }}>Wpisz wartości sumy Einsteina (do 1 miejsca po przecinku).</p>
+              </div>
+              <div className="input-group">
+                <div className="answers-row">
+                  {state.userEinstein.map((val, idx) => (
+                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                      <span style={{ fontFamily: 'Fira Code', fontSize: '1.15rem', fontWeight: 800, whiteSpace: 'nowrap' }}>x{idx + 1}:</span>
+                      <input type="text" className="answer-box" style={{ width: '4rem', height: '3.5rem', fontSize: '1.25rem' }} value={val}
+                        onChange={(e) => { const newAns = [...state.userEinstein]; newAns[idx] = e.target.value; setState(s => ({ ...s, userEinstein: newAns, isCorrect_einstein: null })); }}
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleCheck('einstein'); }} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <TaskControls
+                onCheck={() => handleCheck('einstein')}
+                showSolution={state.showSolution_einstein} onToggleSolution={() => setState(s => ({ ...s, showSolution_einstein: !s.showSolution_einstein }))}
+                showHelp={state.showHelp_einstein} onToggleHelp={() => setState(s => ({ ...s, showHelp_einstein: !s.showHelp_einstein }))}
+              />
+              <TaskResult isCorrect={state.isCorrect_einstein} />
+              {state.showHelp_einstein && (
+                <div className="sensei-container" style={{ marginTop: '1rem' }}>
+                  <SenseiWuIcon className="sensei-avatar" />
+                  <div className="help-box">
+                    <p>Suma Einsteina (s-norma) to wzór: <strong>(a + b) / (1 + ab)</strong>, gdzie a i b to wartości μ(x) ze zbiorów A i B.</p>
+                  </div>
+                </div>
+              )}
+              {state.showSolution_einstein && (
+                <div className="solution-box" style={{ marginTop: '1rem' }}>
+                  <span>Odpowiedź: A ⊕ B = {formatSet(fuzzyEinsteinSum(state.A_rozszerzone, state.B_rozszerzone))}</span>
+                </div>
+              )}
+            </TaskSection>
+          </>
+        )}
+
+        {/* ----------------- MIARY ----------------- */}
+        {state.mode === 'miary' && (
+          <>
+            <div className="card" style={{ marginBottom: '1.5rem' }}>
+              <div className="operation-type">Zbiór rozmyty A oraz podsumowanie z S</div>
+              <div className="array-display">
+                <span className="array-label">A =</span>
+                <span className="array-values">{formatSet(state.A_miary)}</span>
+              </div>
+              <div className="array-display" style={{ marginTop: '0.5rem' }}>
+                <span className="array-label">S =</span>
+                <span className="array-values">{formatSet(state.S_miary)}</span>
+              </div>
+            </div>
+
+            {/* Indeks rozmycia */}
+            <TaskSection>
+              <div className="card">
+                <div className="operation-type">1. Stopień rozmycia in(A)</div>
+                <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '0.5rem 0 0 0' }}>Oblicz stopień rozmycia in(A) podanego zbioru A.</p>
+              </div>
+              <div className="input-group">
+                <div className="answers-row">
+                  <span style={{ fontWeight: 800, fontSize: '1.5rem', color: 'var(--text-dark)' }}>in(A) = </span>
+                  <input type="text" className="answer-box" style={{ width: '6rem' }} value={state.userIn}
+                    onChange={(e) => setState(s => ({ ...s, userIn: e.target.value, isCorrect_in: null }))}
+                    onKeyDown={(e) => e.key === 'Enter' && handleCheck('in')} />
+                </div>
+              </div>
+              <TaskControls
+                onCheck={() => handleCheck('in')}
+                showSolution={state.showSolution_in} onToggleSolution={() => setState(s => ({ ...s, showSolution_in: !s.showSolution_in }))}
+                showHelp={state.showHelp_in} onToggleHelp={() => setState(s => ({ ...s, showHelp_in: !s.showHelp_in }))}
+              />
+              <TaskResult isCorrect={state.isCorrect_in} />
+              {state.showHelp_in && (
+                <div className="sensei-container" style={{ marginTop: '1rem' }}>
+                  <SenseiWuIcon className="sensei-avatar" />
+                  <div className="help-box">
+                    <p>Zgodnie ze wzorem z zajęć, stopień rozmycia definiujemy jako <strong>|supp(A)| / |X|</strong>.</p>
+                    <p>Oblicz moc nośnika zbioru (ile liczb jest &gt; 0) i podziel przez całkowitą liczbę elementów przestrzeni X (która tutaj wynosi 5).</p>
+                  </div>
+                </div>
+              )}
+              {state.showSolution_in && (
+                <div className="solution-box" style={{ marginTop: '1rem' }}>
+                  <span>Odpowiedź: in(A) = {calcSuppSize(state.A_miary)} / {state.A_miary.length} = {calcIn(state.A_miary).toFixed(1)}</span>
+                </div>
+              )}
+            </TaskSection>
+
+            {/* Miara T1 */}
+            <TaskSection>
+              <div className="card">
+                <div className="operation-type">2. Miara prawdziwości T1 (Kwantyfikator względny)</div>
+                <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '0.5rem 0 0 0' }}>Mamy podsumowanie "Większość obiektów jest S". Kwantyfikator "Większość" dany jest wzorem μ<sub>Q</sub>(x) = x<sup>2</sup>. Oblicz T<sub>1</sub> dla podanego zbioru S.</p>
+              </div>
+              <div className="input-group">
+                <div className="answers-row">
+                  <span style={{ fontWeight: 800, fontSize: '1.5rem', color: 'var(--text-dark)' }}>T1 = </span>
+                  <input type="text" className="answer-box" style={{ width: '6rem' }} value={state.userT1}
+                    onChange={(e) => setState(s => ({ ...s, userT1: e.target.value, isCorrect_t1: null }))}
+                    onKeyDown={(e) => e.key === 'Enter' && handleCheck('t1')} />
+                </div>
+              </div>
+              <TaskControls
+                onCheck={() => handleCheck('t1')}
+                showSolution={state.showSolution_t1} onToggleSolution={() => setState(s => ({ ...s, showSolution_t1: !s.showSolution_t1 }))}
+                showHelp={state.showHelp_t1} onToggleHelp={() => setState(s => ({ ...s, showHelp_t1: !s.showHelp_t1 }))}
+              />
+              <TaskResult isCorrect={state.isCorrect_t1} />
+              {state.showHelp_t1 && (
+                <div className="sensei-container" style={{ marginTop: '1rem' }}>
+                  <SenseiWuIcon className="sensei-avatar" />
+                  <div className="help-box">
+                    <p>Dla podsumowania bez kwalifikatora z kwantyfikatorem względnym, obliczamy <strong>r = Σ μ<sub>S</sub>(x)</strong> i używamy wzoru: <strong>T<sub>1</sub> = μ<sub>Q</sub>(r / m)</strong>, gdzie m to wielkość bazy (tutaj 5).</p>
+                    <p>W skrócie: Oblicz średnią wartość ze zbioru S, a następnie podnieś ją do kwadratu!</p>
+                  </div>
+                </div>
+              )}
+              {state.showSolution_t1 && (
+                <div className="solution-box" style={{ marginTop: '1rem' }}>
+                  <span>Odpowiedź: T1 = {calcT1(state.S_miary).toFixed(2)}</span>
                 </div>
               )}
             </TaskSection>
