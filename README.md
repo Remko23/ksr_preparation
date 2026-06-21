@@ -1,30 +1,31 @@
-# Aplikacja do nauki CPS
+# Aplikacja do nauki KSR
 
-Aplikacja do generowania zadań do nauki na egzamin z **CPS**.
+Aplikacja wspomagająca naukę do odpowiedzi z **KSR** poprzez generowanie zadań ze Zbiorów Rozmytych.
 
 ## Jakie zadania zawiera aplikacja?
 
-1. **Operacje Splotu**
-   - Splot Liniowy
-   - Splot Okresowy
+1. **Podstawy**
+   - Obliczanie kardynalności zbioru ($card(A)$)
+   - Wysokość zbioru ($hgt(A)$)
+   - Wielkość nośnika ($|supp(A)|$)
 
-2. **Dyskretne Sygnały i Suma Ważona**
-   - Wzór sygnału na podstawie wektora próbek
-   - Całkowita energia sygnału dyskretnego
+2. **Operacje**
+   - Suma zbiorów ($A \cup B$, t-konorma max)
+   - Iloczyn zbiorów ($A \cap B$, t-norma min)
+   - Dopełnienie zbioru ($A^c$)
 
-3. **Przekształcenie Fouriera**
-   - Dyskretne Przekształcenie Fouriera (DFT)
-   - Odwrotne Dyskretne Przekształcenie Fouriera (IDFT)
+3. **Przekroje**
+   - Określanie elementów ostrego $\alpha$-przekroju
 
-4. **Próbkowanie**
-   - Częstotliwość próbkowania (Twierdzenie Nyquista)
-   - Zjawisko aliasingu (częstotliwość urojona)
+4. **Rozszerzone Operacje**
+   - Różnica zbiorów ($A \setminus B$)
+   - Suma Einsteina (s-norma $a \oplus b$)
 
-5. **Kwantyzacja**
-   - Obliczanie kroku kwantyzacji (rozdzielczości)
-   - Stosunek sygnału do szumu kwantyzacji (SQNR)
+5. **Miary Rozmycia**
+   - Stopień rozmycia ($in(A)$)
+   - Miara prawdziwości ($T_1$) dla podsumowań lingwistycznych (z kwantyfikatorem względnym)
 
-Aplikacja posiada również wbudowane **wytlumaczenia** zadań - czyli instrukcje jak je policzyc.
+Aplikacja posiada również wbudowane **podpowiedzi** do każdego zadania (instrukcje od Sensei Wu jak rozwiązać dany problem) oraz wyświetla poprawne rozwiązania, jeśli napotkasz trudności z własnymi obliczeniami.
 
 ## Uruchomienie aplikacji
 
