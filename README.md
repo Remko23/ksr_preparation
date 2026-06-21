@@ -8,11 +8,13 @@ Aplikacja wspomagająca naukę do odpowiedzi z **KSR** poprzez generowanie zada�
    - Obliczanie kardynalności zbioru ($card(A)$)
    - Wysokość zbioru ($hgt(A)$)
    - Wielkość nośnika ($|supp(A)|$)
+   - Określanie, czy zbiór jest normalny
 
 2. **Operacje**
    - Suma zbiorów ($A \cup B$, s-norma max)
    - Iloczyn zbiorów ($A \cap B$, t-norma min)
    - Dopełnienie zbioru ($A^c$)
+   - Prawo wyłączonego środka ($A \cup A^c$)
 
 3. **Przekroje**
    - Określanie elementów ostrego $\alpha$-przekroju
