@@ -22,6 +22,11 @@
   color: var(--text-dark);
 }
 
+html {
+  background-color: var(--bg-dark, #450a0a);
+  transition: background-color 0.5s ease;
+}
+
 body {
   margin: 0;
   display: flex;
@@ -29,8 +34,10 @@ body {
   min-width: 320px;
   min-height: 100vh;
   transition: background 0.5s ease;
+  background-color: var(--bg-dark, #450a0a);
   background-image: repeating-linear-gradient(90deg, var(--stripe-color, rgba(0, 0, 0, 0.05)) 0px, var(--stripe-color, rgba(0, 0, 0, 0.05)) 40px, transparent 40px, transparent 80px),
     radial-gradient(circle at center, var(--theme-shadow, #991b1b), var(--bg-dark, #450a0a));
+  background-attachment: fixed;
 }
 
 #root {

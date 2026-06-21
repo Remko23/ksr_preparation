@@ -393,6 +393,7 @@ function App() {
   if (state.mode === 'miary') themeClass = 'theme-zane';
 
   useEffect(() => {
+    document.documentElement.className = themeClass;
     document.body.className = themeClass;
   }, [themeClass]);
 
