@@ -29,6 +29,11 @@ interface AppState {
   showHelp_supp: boolean;
   userSupp: string;
 
+  isCorrect_normal: boolean | null;
+  showSolution_normal: boolean;
+  showHelp_normal: boolean;
+  userNormal: string;
+
   // Operacje mode
   A_operacje: number[];
   B_operacje: number[];
@@ -47,6 +52,11 @@ interface AppState {
   showSolution_dopelnienie: boolean;
   showHelp_dopelnienie: boolean;
   userDopelnienie: string[];
+
+  isCorrect_sumac: boolean | null;
+  showSolution_sumac: boolean;
+  showHelp_sumac: boolean;
+  userSumac: string[];
 
   // Przekroje mode
   A_przekroje: number[];
@@ -195,12 +205,14 @@ function App() {
     isCorrect_card: null, showSolution_card: false, showHelp_card: false, userCard: '',
     isCorrect_hgt: null, showSolution_hgt: false, showHelp_hgt: false, userHgt: '',
     isCorrect_supp: null, showSolution_supp: false, showHelp_supp: false, userSupp: '',
+    isCorrect_normal: null, showSolution_normal: false, showHelp_normal: false, userNormal: '',
 
     // Operacje
     A_operacje: [], B_operacje: [],
     isCorrect_suma: null, showSolution_suma: false, showHelp_suma: false, userSuma: [],
     isCorrect_iloczyn: null, showSolution_iloczyn: false, showHelp_iloczyn: false, userIloczyn: [],
     isCorrect_dopelnienie: null, showSolution_dopelnienie: false, showHelp_dopelnienie: false, userDopelnienie: [],
+    isCorrect_sumac: null, showSolution_sumac: false, showHelp_sumac: false, userSumac: [],
 
     // Przekroje
     A_przekroje: [], alpha: 0,
@@ -231,6 +243,7 @@ function App() {
         isCorrect_card: null, showSolution_card: false, showHelp_card: false, userCard: '',
         isCorrect_hgt: null, showSolution_hgt: false, showHelp_hgt: false, userHgt: '',
         isCorrect_supp: null, showSolution_supp: false, showHelp_supp: false, userSupp: '',
+        isCorrect_normal: null, showSolution_normal: false, showHelp_normal: false, userNormal: '',
       }));
     } else if (currentMode === 'operacje') {
       setState(s => ({
@@ -241,6 +254,7 @@ function App() {
         isCorrect_suma: null, showSolution_suma: false, showHelp_suma: false, userSuma: new Array(len).fill(''),
         isCorrect_iloczyn: null, showSolution_iloczyn: false, showHelp_iloczyn: false, userIloczyn: new Array(len).fill(''),
         isCorrect_dopelnienie: null, showSolution_dopelnienie: false, showHelp_dopelnienie: false, userDopelnienie: new Array(len).fill(''),
+        isCorrect_sumac: null, showSolution_sumac: false, showHelp_sumac: false, userSumac: new Array(len).fill(''),
       }));
     } else if (currentMode === 'przekroje') {
       setState(s => ({
@@ -305,6 +319,15 @@ function App() {
       }
       const correct = calcSuppSize(state.A_podstawy);
       setState(s => ({ ...s, isCorrect_supp: parsed === correct }));
+    } else if (taskType === 'normal') {
+      const parsed = state.userNormal.trim().toLowerCase();
+      if (parsed !== 'tak' && parsed !== 'nie') {
+        setState(s => ({ ...s, alertMsg: 'Wpisz "tak" lub "nie".' }));
+        return;
+      }
+      const isNormal = calcHgt(state.A_podstawy) === 1.0;
+      const correctAns = isNormal ? 'tak' : 'nie';
+      setState(s => ({ ...s, isCorrect_normal: parsed === correctAns }));
     }
     // OPERACJE
     else if (taskType === 'suma') {
@@ -334,6 +357,16 @@ function App() {
       const correct = fuzzyComplement(state.A_operacje);
       const isMatch = parsed.every((val, i) => Math.abs(val - correct[i]) < 0.05);
       setState(s => ({ ...s, isCorrect_dopelnienie: isMatch }));
+    } else if (taskType === 'sumac') {
+      const parsed = state.userSumac.map(s => parseFloat(s.trim().replace(',', '.')));
+      if (parsed.some(isNaN)) {
+        setState(s => ({ ...s, alertMsg: 'Wypełnij wszystkie okienka poprawnymi liczbami.' }));
+        return;
+      }
+      const Ac = fuzzyComplement(state.A_operacje);
+      const correct = fuzzyUnion(state.A_operacje, Ac);
+      const isMatch = parsed.every((val, i) => Math.abs(val - correct[i]) < 0.05);
+      setState(s => ({ ...s, isCorrect_sumac: isMatch }));
     }
     // PRZEKROJE
     else if (taskType === 'przekroj') {
@@ -555,6 +588,40 @@ function App() {
                 </div>
               )}
             </TaskSection>
+
+            {/* Zbiór normalny */}
+            <TaskSection>
+              <div className="card">
+                <div className="operation-type">4. Zbiór normalny</div>
+                <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '0.5rem 0 0 0' }}>Czy zbiór A jest normalny? (wpisz "tak" lub "nie")</p>
+              </div>
+              <div className="input-group">
+                <div className="answers-row">
+                  <input type="text" className="answer-box" style={{ width: '8rem', fontSize: '1.25rem' }} value={state.userNormal}
+                    onChange={(e) => setState(s => ({ ...s, userNormal: e.target.value, isCorrect_normal: null }))}
+                    onKeyDown={(e) => e.key === 'Enter' && handleCheck('normal')} />
+                </div>
+              </div>
+              <TaskControls
+                onCheck={() => handleCheck('normal')}
+                showSolution={state.showSolution_normal} onToggleSolution={() => setState(s => ({ ...s, showSolution_normal: !s.showSolution_normal }))}
+                showHelp={state.showHelp_normal} onToggleHelp={() => setState(s => ({ ...s, showHelp_normal: !s.showHelp_normal }))}
+              />
+              <TaskResult isCorrect={state.isCorrect_normal} />
+              {state.showHelp_normal && (
+                <div className="sensei-container" style={{ marginTop: '1rem' }}>
+                  <SenseiWuIcon className="sensei-avatar" />
+                  <div className="help-box">
+                    <p>Zbiór jest normalny, jeśli jego wysokość hgt(A) jest równa dokładnie 1 (czyli istnieje element należący do niego w pełni).</p>
+                  </div>
+                </div>
+              )}
+              {state.showSolution_normal && (
+                <div className="solution-box" style={{ marginTop: '1rem' }}>
+                  <span>Odpowiedź: {calcHgt(state.A_podstawy) === 1.0 ? 'tak (ponieważ hgt(A) = 1)' : 'nie (ponieważ hgt(A) < 1)'}</span>
+                </div>
+              )}
+            </TaskSection>
           </>
         )}
 
@@ -685,6 +752,45 @@ function App() {
               {state.showSolution_dopelnienie && (
                 <div className="solution-box" style={{ marginTop: '1rem' }}>
                   <span>Odpowiedź: A<sup>c</sup> = {formatSet(fuzzyComplement(state.A_operacje))}</span>
+                </div>
+              )}
+            </TaskSection>
+
+            {/* Suma z dopełnieniem */}
+            <TaskSection>
+              <div className="card">
+                <div className="operation-type">4. Prawo wyłączonego środka (A ∪ A<sup>c</sup>)</div>
+                <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '0.5rem 0 0 0' }}>Wyznacz sumę zbioru A i jego dopełnienia (używając standardowej s-normy).</p>
+              </div>
+              <div className="input-group">
+                <div className="answers-row">
+                  {state.userSumac.map((val, idx) => (
+                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                      <span style={{ fontFamily: 'Fira Code', fontSize: '1.15rem', fontWeight: 800, whiteSpace: 'nowrap' }}>x{idx + 1}:</span>
+                      <input type="text" className="answer-box" style={{ width: '4rem', height: '3.5rem', fontSize: '1.25rem' }} value={val}
+                        onChange={(e) => { const newAns = [...state.userSumac]; newAns[idx] = e.target.value; setState(s => ({ ...s, userSumac: newAns, isCorrect_sumac: null })); }}
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleCheck('sumac'); }} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <TaskControls
+                onCheck={() => handleCheck('sumac')}
+                showSolution={state.showSolution_sumac} onToggleSolution={() => setState(s => ({ ...s, showSolution_sumac: !s.showSolution_sumac }))}
+                showHelp={state.showHelp_sumac} onToggleHelp={() => setState(s => ({ ...s, showHelp_sumac: !s.showHelp_sumac }))}
+              />
+              <TaskResult isCorrect={state.isCorrect_sumac} />
+              {state.showHelp_sumac && (
+                <div className="sensei-container" style={{ marginTop: '1rem' }}>
+                  <SenseiWuIcon className="sensei-avatar" />
+                  <div className="help-box">
+                    <p>W logice rozmytej prawo wyłączonego środka zazwyczaj <strong>nie zachodzi</strong>. Oblicz to jako zwykłą sumę zbioru A oraz A<sup>c</sup>: μ(x) = max(μ<sub>A</sub>(x), 1 - μ<sub>A</sub>(x)).</p>
+                  </div>
+                </div>
+              )}
+              {state.showSolution_sumac && (
+                <div className="solution-box" style={{ marginTop: '1rem' }}>
+                  <span>Odpowiedź: A ∪ A<sup>c</sup> = {formatSet(fuzzyUnion(state.A_operacje, fuzzyComplement(state.A_operacje)))}</span>
                 </div>
               )}
             </TaskSection>
