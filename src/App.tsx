@@ -32,7 +32,7 @@ interface AppState {
   // Operacje mode
   A_operacje: number[];
   B_operacje: number[];
-  
+
   isCorrect_suma: boolean | null;
   showSolution_suma: boolean;
   showHelp_suma: boolean;
@@ -51,7 +51,7 @@ interface AppState {
   // Przekroje mode
   A_przekroje: number[];
   alpha: number;
-  
+
   isCorrect_przekroj: boolean | null;
   showSolution_przekroj: boolean;
   showHelp_przekroj: boolean;
@@ -305,7 +305,7 @@ function App() {
       }
       const correct = calcSuppSize(state.A_podstawy);
       setState(s => ({ ...s, isCorrect_supp: parsed === correct }));
-    } 
+    }
     // OPERACJE
     else if (taskType === 'suma') {
       const parsed = state.userSuma.map(s => parseFloat(s.trim().replace(',', '.')));
@@ -575,7 +575,7 @@ function App() {
             {/* Suma */}
             <TaskSection>
               <div className="card">
-                <div className="operation-type">1. Suma Zbiorów (A ∪ B)</div>
+                <div className="operation-type">1. Suma Zbiorów (A ∪ B) - standardowa s-norma (Maksimum)</div>
                 <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '0.5rem 0 0 0' }}>Wpisz wartości przynależności sumy zbiorów dla elementów x1, ..., x5.</p>
               </div>
               <div className="input-group">
@@ -614,7 +614,7 @@ function App() {
             {/* Iloczyn */}
             <TaskSection>
               <div className="card">
-                <div className="operation-type">2. Iloczyn (Przekrój) Zbiorów (A ∩ B)</div>
+                <div className="operation-type">2. Iloczyn (Przekrój) Zbiorów (A ∩ B) - standardowa t-norma (Minimum)</div>
               </div>
               <div className="input-group">
                 <div className="answers-row">
@@ -735,7 +735,7 @@ function App() {
               )}
               {state.showSolution_przekroj && (
                 <div className="solution-box" style={{ marginTop: '1rem' }}>
-                  <span>Odpowiedź: α-przekrój = {'{'} {calcAlphaCut(state.A_przekroje, state.alpha).map((v, i) => `${v}/x${i+1}`).join(', ')} {'}'}</span>
+                  <span>Odpowiedź: α-przekrój = {'{'} {calcAlphaCut(state.A_przekroje, state.alpha).map((v, i) => `${v}/x${i + 1}`).join(', ')} {'}'}</span>
                 </div>
               )}
             </TaskSection>
