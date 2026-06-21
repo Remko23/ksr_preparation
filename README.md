@@ -10,7 +10,7 @@ Aplikacja wspomagająca naukę do odpowiedzi z **KSR** poprzez generowanie zada�
    - Wielkość nośnika ($|supp(A)|$)
 
 2. **Operacje**
-   - Suma zbiorów ($A \cup B$, t-konorma max)
+   - Suma zbiorów ($A \cup B$, s-norma max)
    - Iloczyn zbiorów ($A \cap B$, t-norma min)
    - Dopełnienie zbioru ($A^c$)
 
